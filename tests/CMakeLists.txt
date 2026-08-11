@@ -84,6 +84,48 @@ set_tests_properties(aengine.architecture.ai_code_map PROPERTIES
     LABELS "architecture;ai-code-map;foundation;platform"
 )
 
+set(aengine_safety_tool_root "${PROJECT_SOURCE_DIR}/tools/architecture_safety")
+
+add_test(
+    NAME aengine.architecture.module_contract
+    COMMAND powershell.exe -NoProfile -ExecutionPolicy Bypass
+        -File "${aengine_safety_tool_root}/VerifyModuleContracts.ps1"
+        -RepoRoot "${PROJECT_SOURCE_DIR}"
+)
+set_tests_properties(aengine.architecture.module_contract PROPERTIES
+    LABELS "architecture;safety;module-contract;foundation;platform"
+)
+
+add_test(
+    NAME aengine.architecture.dependency_cycle
+    COMMAND powershell.exe -NoProfile -ExecutionPolicy Bypass
+        -File "${aengine_safety_tool_root}/VerifyDependencyGraph.ps1"
+        -RepoRoot "${PROJECT_SOURCE_DIR}"
+)
+set_tests_properties(aengine.architecture.dependency_cycle PROPERTIES
+    LABELS "architecture;safety;dependency;foundation;platform"
+)
+
+add_test(
+    NAME aengine.architecture.public_api_ownership
+    COMMAND powershell.exe -NoProfile -ExecutionPolicy Bypass
+        -File "${aengine_safety_tool_root}/VerifyPublicApiOwnership.ps1"
+        -RepoRoot "${PROJECT_SOURCE_DIR}"
+)
+set_tests_properties(aengine.architecture.public_api_ownership PROPERTIES
+    LABELS "architecture;safety;public-api;foundation;platform"
+)
+
+add_test(
+    NAME aengine.architecture.oop_policy
+    COMMAND powershell.exe -NoProfile -ExecutionPolicy Bypass
+        -File "${aengine_safety_tool_root}/VerifyOopPolicy.ps1"
+        -RepoRoot "${PROJECT_SOURCE_DIR}"
+)
+set_tests_properties(aengine.architecture.oop_policy PROPERTIES
+    LABELS "architecture;safety;oop;foundation;platform"
+)
+
 add_test(
     NAME aengine.info
     COMMAND aengine_info

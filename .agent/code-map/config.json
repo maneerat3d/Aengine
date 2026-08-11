@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "current_phase": "Phase 1 complete; Phase 2 Application/Platform facade is next",
+  "canonical_build_entrypoint": "build.bat",
+  "module_manifest_name": "MODULE.json",
+  "generated_root": ".agent/code-map/current",
+  "rules": [
+    "Read AGENTS.md first",
+    "Use build.bat as the only normal build/test entrypoint",
+    "Read INDEX.json before opening implementation files",
+    "Load only the module map and skills relevant to the task",
+    "Treat MODULE.json as declared intent and source/CMake/tests as observed reality"
+  ]
+}

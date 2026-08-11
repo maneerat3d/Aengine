@@ -6,7 +6,7 @@ diagnostics และ tooling ให้คนกับ AI พัฒนาต่�
 
 ## สถานะ
 
-**Phase 2A complete: dependency-free headless application lifecycle; architecture/OOP safety baseline before Phase 2B**
+**Phase 2B.1: deterministic time port + internal platform service injection**
 
 License: [MIT](LICENSE)
 
@@ -26,7 +26,7 @@ copy APaint หรือ engine เดิมทั้งก้อน แต่�
 - [Research Brief](docs/RESEARCH_BRIEF.md)
 - [Phase 0 Approval Package](docs/PHASE_0_APPROVAL.md)
 
-## Phase 2A developer experience
+## Phase 2 developer experience
 
 ```cpp
 #include <AEngine/Application.h>
@@ -55,8 +55,17 @@ int main() {
 ```
 
 Phase 2A implement `App::Init`, `Run`, `PumpFrame`, `Quit`, lifecycle state และ deterministic
-application trace โดยยังไม่เพิ่ม SDL, Vulkan, ImGui หรือ APaint dependency. Window/input/time/
-filesystem ports และ `ApplicationServices` injection เป็น Phase 2B
+application trace โดยไม่มี SDL, Vulkan, ImGui หรือ APaint dependency
+
+Phase 2B.1 เพิ่ม internal `TimePort`, deterministic `FixedStepTimePort` และ
+`ApplicationPlatformServices` ที่ composition root เป็น owner แล้ว inject เข้า
+`ApplicationRuntime` ด้วย RAII เวลา advance เฉพาะ frame ที่ pump สำเร็จ และไม่ advance
+บน quit-only safe boundary
+
+ชื่อ `ApplicationPlatformServices` เป็น internal platform dependency owner โดยตั้งใจไม่ใช้ชื่อ
+public `aengine::ApplicationServices` ซึ่ง canonical architecture section 8.6 สงวนไว้สำหรับ
+immutable bundle ของ High-level Workflow interfaces ใน phase หลังจาก workflow มี consumer จริง
+Window/input/filesystem ports เป็น slice ถัดไปตาม consumer ที่เกิดขึ้นจริง
 
 ## หลักการ
 
@@ -75,10 +84,11 @@ filesystem ports และ `ApplicationServices` injection เป็น Phase 2B
 2. Phase 1 — foundation, typed handles, errors/results, jobs และ diagnostics
 3. Phase 2A — dependency-free Application lifecycle
 4. Architecture/OOP Safety Baseline — durable owner/lifetime/threading/invariant/dependency guards
-5. Phase 2B — window/input/time/filesystem ports และ `ApplicationServices`
-6. Phase 3 — world, scene, asset และ glTF viewer slice
-7. Phase 4 — renderer, shader library, Vulkan backend และ `View3D`
-8. Phase 5+ — High-level UI/workflows/editor/add-ons แล้วจึงทยอยย้าย APaint และ feature packs
+5. Phase 2B.1 — deterministic time port และ internal platform service injection
+6. Phase 2B next — window/input/filesystem ports ตาม real consumer
+7. Phase 3 — world, scene, asset และ glTF viewer slice
+8. Phase 4 — renderer, shader library, Vulkan backend และ `View3D`
+9. Phase 5+ — High-level UI/workflows/editor/add-ons แล้วจึงทยอยย้าย APaint และ feature packs
 
 ## Build และ test
 
@@ -96,7 +106,7 @@ build.bat                 rem AI map + Debug build/test + Release build/test
 build.bat debug           rem AI map + Debug build/test
 build.bat release         rem AI map + Release build/test
 build.bat test REGEX      rem AI map + Debug build + focused CTest regex
-build.bat map             rem update AI navigation map only when needed
+build.bat map             rem update AI code map only when inputs changed
 ```
 
 `build.bat` pin Visual Studio 2022 17.14 / MSVC 19.44 toolset 14.44 / Windows SDK

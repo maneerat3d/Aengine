@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "current_phase": "Phase 2A complete; architecture/OOP safety baseline before Phase 2B platform ports",
+  "current_phase": "Phase 2B.1 deterministic time port and internal platform service injection; window/input/filesystem ports next",
   "canonical_build_entrypoint": "build.bat",
   "module_manifest_name": "MODULE.json",
   "generated_root": ".agent/code-map/current",

@@ -17,6 +17,22 @@ function Get-AiCMakeModel {
     return [ordered]@{ files = $cmakeFiles; text = $allText; aliases = $aliases }
 }
 
+function Get-AiProductionTargets {
+    $texts = @()
+    foreach ($rootName in @("engine", "tools")) {
+        $root = Join-Path $script:RepoRoot $rootName
+        if (-not (Test-Path $root)) { continue }
+        $texts += Get-ChildItem $root -Recurse -File -Filter "CMakeLists.txt" | Sort-Object FullName | ForEach-Object {
+            Get-Content $_.FullName -Raw
+        }
+    }
+    $targets = @()
+    foreach ($match in [regex]::Matches(($texts -join "`n"), '(?i)add_(?:library|executable)\s*\(\s*(aengine_[^\s\)]+)')) {
+        $targets += $match.Groups[1].Value
+    }
+    return @($targets | Sort-Object -Unique)
+}
+
 function Get-AiTargetDependencies([string]$Target, $CMakeModel) {
     $pattern = 'target_link_libraries\s*\(\s*' + [regex]::Escape($Target) + '\s+(?<body>.*?)\)'
     $dependencies = @()
@@ -81,7 +97,11 @@ function Get-AiPublicSymbols($Headers) {
 function New-AiModuleMap($ManifestFile, $ObservedTests, $CMakeModel) {
     $manifest = Get-Content $ManifestFile.FullName -Raw | ConvertFrom-Json
     $module = [string]$manifest.module
-    if (-not $module) { throw "MODULE.json missing module name: $($ManifestFile.FullName)" }
+    $kind = [string]$manifest.kind
+    $responsibility = [string]$manifest.responsibility
+    if (-not $module -or -not $kind -or -not $responsibility) {
+        throw "MODULE.json requires module, kind, and responsibility: $($ManifestFile.FullName)"
+    }
     $targetPattern = '(?i)(add_library|add_executable)\s*\(\s*' + [regex]::Escape($module) + '(\s|\))'
     if (-not [regex]::IsMatch($CMakeModel.text, $targetPattern)) {
         throw "Declared module has no CMake target: $module"
@@ -105,14 +125,11 @@ function New-AiModuleMap($ManifestFile, $ObservedTests, $CMakeModel) {
         }
     }
 
-    $sourceFiles = @($implementationFiles | ForEach-Object {
-        [ordered]@{ path = Get-AiRepoRelativePath $_.FullName; line_count = @(Get-Content $_.FullName).Count }
-    })
     return [ordered]@{
         schema_version = 1
         module = $module
-        kind = [string]$manifest.kind
-        responsibility = [string]$manifest.responsibility
+        kind = $kind
+        responsibility = $responsibility
         manifest = Get-AiRepoRelativePath $ManifestFile.FullName
         declared = [ordered]@{
             allowed_dependencies = $allowedDependencies
@@ -125,7 +142,7 @@ function New-AiModuleMap($ManifestFile, $ObservedTests, $CMakeModel) {
         observed = [ordered]@{
             dependencies = $actualDependencies
             public_headers = @($publicHeaders | ForEach-Object { Get-AiRepoRelativePath $_.FullName })
-            implementation_files = $sourceFiles
+            implementation_files = @($implementationFiles | ForEach-Object { Get-AiRepoRelativePath $_.FullName })
             public_symbols = Get-AiPublicSymbols $publicHeaders
         }
     }
@@ -142,6 +159,10 @@ function Get-AiModuleMaps {
     $maps = @()
     foreach ($manifestFile in @(Get-ChildItem $roots -Recurse -File -Filter "MODULE.json" | Sort-Object FullName)) {
         $maps += New-AiModuleMap $manifestFile $observedTests $cmakeModel
+    }
+    $mappedTargets = @($maps | ForEach-Object { $_.module })
+    foreach ($target in Get-AiProductionTargets) {
+        if ($target -notin $mappedTargets) { throw "Production target is missing MODULE.json: $target" }
     }
     return @($maps | Sort-Object module)
 }

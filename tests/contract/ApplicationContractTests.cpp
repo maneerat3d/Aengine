@@ -1,4 +1,5 @@
 #include <AEngine/Application.h>
+#include <AEngine/Platform/Time.h>
 
 #include <cstdlib>
 #include <iostream>
@@ -18,6 +19,35 @@ aengine::AppConfig ValidConfig() {
     return aengine::AppConfig{
         .name = aengine::Utf8View{kName, sizeof(kName) - 1},
     };
+}
+
+class FixedTimeSource final : public aengine::ITimeSource {
+public:
+    explicit FixedTimeSource(std::int64_t nanoseconds) noexcept
+        : nanoseconds_(nanoseconds) {}
+
+    [[nodiscard]] aengine::MonotonicTimePoint Now() const noexcept override {
+        return aengine::MonotonicTimePoint{nanoseconds_};
+    }
+
+private:
+    std::int64_t nanoseconds_ = 0;
+};
+
+void TestTimePortContract() {
+    FixedTimeSource fixed{42};
+    const aengine::ITimeSource& port = fixed;
+    Require(port.Now().nanoseconds == 42,
+            "time port must be substitutable through the public interface");
+
+    auto created = aengine::CreateMonotonicTimeSource();
+    Require(static_cast<bool>(created),
+            "production monotonic time source creation must succeed");
+
+    const auto first = created.Value()->Now();
+    const auto second = created.Value()->Now();
+    Require(second.nanoseconds >= first.nanoseconds,
+            "production monotonic time source must not move backwards");
 }
 
 void TestStartupValidation() {
@@ -97,6 +127,7 @@ void TestOwnedRunConsumesPendingQuit() {
 }
 
 int main() {
+    TestTimePortContract();
     TestStartupValidation();
     TestManualLifecycleAndTrace();
     TestOwnedRunConsumesPendingQuit();

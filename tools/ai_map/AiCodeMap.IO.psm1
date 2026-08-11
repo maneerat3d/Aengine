@@ -23,6 +23,16 @@ function Get-AiTextSha256([string]$Text) {
     finally { $sha.Dispose() }
 }
 
+function Get-AiComparableHash([string]$Path) {
+    $textExtensions = @(".md", ".json", ".h", ".hpp", ".cpp", ".c", ".cc", ".cxx", ".cmake", ".ps1", ".psm1", ".txt", ".bat")
+    $extension = [IO.Path]::GetExtension($Path).ToLowerInvariant()
+    if ($extension -in $textExtensions) {
+        $text = [IO.File]::ReadAllText($Path).Replace("`r`n", "`n").Replace("`r", "`n")
+        return Get-AiTextSha256 $text
+    }
+    return (Get-FileHash $Path -Algorithm SHA256).Hash.ToLowerInvariant()
+}
+
 function Write-AiUtf8([string]$Path, [string]$Content) {
     $directory = Split-Path -Parent $Path
     if ($directory) { [IO.Directory]::CreateDirectory($directory) | Out-Null }
@@ -39,8 +49,7 @@ function Get-AiDirectoryFingerprint([string]$Root) {
     $parts = @()
     Get-ChildItem $Root -Recurse -File | Sort-Object FullName | ForEach-Object {
         $relative = $_.FullName.Substring($prefix.Length).TrimStart('\').Replace('\', '/')
-        $hash = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
-        $parts += ("{0}:{1}" -f $relative, $hash)
+        $parts += ("{0}:{1}" -f $relative, (Get-AiComparableHash $_.FullName))
     }
     return Get-AiTextSha256 ($parts -join "`n")
 }
@@ -61,8 +70,7 @@ function Get-AiInputFingerprint {
     }
     $parts = @()
     foreach ($file in ($files | Sort-Object FullName -Unique)) {
-        $hash = (Get-FileHash $file.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
-        $parts += ("{0}:{1}" -f (Get-AiRepoRelativePath $file.FullName), $hash)
+        $parts += ("{0}:{1}" -f (Get-AiRepoRelativePath $file.FullName), (Get-AiComparableHash $file.FullName))
     }
     return Get-AiTextSha256 ($parts -join "`n")
 }
@@ -78,7 +86,7 @@ function Sync-AiGeneratedDirectory([string]$Source, [string]$Destination) {
         $relative = $file.FullName.Substring($Source.TrimEnd('\').Length).TrimStart('\')
         $target = Join-Path $Destination $relative
         [IO.Directory]::CreateDirectory((Split-Path -Parent $target)) | Out-Null
-        if (-not (Test-Path $target) -or (Get-FileHash $file.FullName).Hash -ne (Get-FileHash $target).Hash) {
+        if (-not (Test-Path $target) -or (Get-AiComparableHash $file.FullName) -ne (Get-AiComparableHash $target)) {
             Copy-Item $file.FullName $target -Force
             $changed++
         }
@@ -96,11 +104,11 @@ function Compare-AiGeneratedDirectory([string]$Expected, [string]$Actual) {
     $actualFiles = @{}
     Get-ChildItem $Expected -Recurse -File | ForEach-Object {
         $relative = $_.FullName.Substring($Expected.TrimEnd('\').Length).TrimStart('\').Replace('\', '/')
-        $expectedFiles[$relative] = (Get-FileHash $_.FullName).Hash
+        $expectedFiles[$relative] = Get-AiComparableHash $_.FullName
     }
     Get-ChildItem $Actual -Recurse -File | ForEach-Object {
         $relative = $_.FullName.Substring($Actual.TrimEnd('\').Length).TrimStart('\').Replace('\', '/')
-        $actualFiles[$relative] = (Get-FileHash $_.FullName).Hash
+        $actualFiles[$relative] = Get-AiComparableHash $_.FullName
     }
     $differences = @()
     foreach ($key in @($expectedFiles.Keys + $actualFiles.Keys | Sort-Object -Unique)) {

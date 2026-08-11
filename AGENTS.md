@@ -37,7 +37,7 @@
 
 ก่อนสร้างหรือแก้ production code:
 
-1. อ่าน canonical architecture และ section ของ phase ปัจจุบัน; งาน APaint/migration อ่าน `docs/AENGINE_APAINT_BOUNDARY.md` เพิ่ม และงาน UI อ่าน `docs/AENGINE_UI_ARCHITECTURE.md`
+1. อ่าน canonical architecture และ section ของ phase ปัจจุบัน; งาน APaint/migration อ่าน `docs/AENGINE_APAINT_BOUNDARY.md` เพิ่ม และงาน UI/editor/panel/viewport/ImGui อ่าน `docs/AENGINE_UI_ARCHITECTURE.md`
 2. อ่าน `docs/ARCHITECTURE_SAFETY_BASELINE.md` และ `docs/CODE_SHAPE_POLICY.md`
 3. ระบุ current phase, user outcome, target module(s), owner/API, dependency direction, lifetime/state, threading, mutation gateway, invariants, exact files, tests และ stop line
 4. รักษา MIT license และห้ามเดา platform/toolchain/ECS หรือ license compatibility ของ donor/third-party code
@@ -58,6 +58,7 @@
 - `build.bat` fingerprint source/CMake/tests/manifests และ regenerate map เมื่อ input เปลี่ยน แต่เขียน generated file เฉพาะเมื่อ navigation structure เปลี่ยนจริง
 - generated map ที่เปลี่ยนต้อง commit พร้อม production change ใน slice เดียวกัน
 - mutable `state_owner` ชื่อเดียวกันห้ามถูกประกาศโดยหลาย module และทุก invariant ต้องมี stable ID + focused test
+- เริ่มอ่านจาก `INDEX.json` แล้วโหลด `modules/<target>.json` เฉพาะ target ที่เกี่ยวข้อง เพื่อลด context และหลีกเลี่ยง grep ทั้ง repository โดยไม่จำเป็น
 
 ## Skill routing
 
@@ -77,7 +78,7 @@ Skills เป็น procedural overlay เท่านั้นและห้�
 ## OOP / code shape / AI reviewability
 
 - OOP ใช้เพื่อ ownership, lifetime, encapsulation และ real polymorphic seam ไม่ใช่ทำทุกอย่างเป็น class
-- ใช้ Single Responsibility, Composition และ RAII เป็น default
+- ใช้ Single Responsibility, Composition และ RAII เป็น default; ห้าม God class หรือ manager กลางที่ถือ mutable state ของหลาย subsystem
 - ใช้ `struct` สำหรับ simple value/data contract และ `class` เมื่อมี protected invariant/owned lifetime
 - แยก state owner, orchestration, policy/strategy, backend adapter, serialization และ UI เมื่อมีเหตุผลเปลี่ยนแยกกัน
 - facade delegate ไป canonical owner และห้าม duplicate mutable state
@@ -85,8 +86,10 @@ Skills เป็น procedural overlay เท่านั้นและห้�
 - interface ต้องมี backend/testing/policy/add-on seam จริง ห้าม speculative abstraction
 - inheritance ใช้ substitutable polymorphism ไม่ใช้ reuse implementation; หลีกเลี่ยง deep/multiple concrete inheritance
 - constructor/composition injection เป็น default; ห้าม global singleton หรือ service locator
+- public header ควรมี primary contract เดียวกับ value types ที่เกี่ยวข้องโดยตรง
 - ห้าม dumping-ground owner เช่น `EngineManager`, `SystemManager`, `GlobalContext`, `ServiceLocator`, `Everything`, `Misc`, `Common` หรือ unscoped `Utils`
-- source file ถึง limit ใน `docs/CODE_SHAPE_POLICY.md` ต้อง split ก่อนเพิ่ม behavior
+- source file ถึง limit ใน `docs/CODE_SHAPE_POLICY.md` ต้อง split ก่อนเพิ่ม behavior; limit เป็น hard stop ไม่ใช่เป้าหมาย
+- exception ต่อ source-shape ต้องมี owner, rationale, temporary budget และ removal/review phase แบบ explicit
 
 ## Dependency / mutation / lifecycle safety
 
@@ -101,20 +104,21 @@ Skills เป็น procedural overlay เท่านั้นและห้�
 ## Canonical build entrypoint
 
 - agent และคนต้องเริ่ม build/test จาก repository root ด้วย `build.bat` เท่านั้น
-- normal workflow ห้ามเรียก `cmake`, `ninja`, `ctest` หรือ AI-map PowerShell scripts โดยตรง
-- exception มีได้เฉพาะตอน debug/แก้ `build.bat`, CMake integration หรือ generator เอง และ final validation ต้องกลับมาที่ `build.bat`
+- normal workflow ห้ามเรียก `cmake`, `ninja`, `ctest` หรือ AI-map/safety PowerShell scripts โดยตรง
+- exception มีได้เฉพาะตอน debug/แก้ `build.bat`, CMake integration หรือ generator/guard เอง และ final validation ต้องกลับมาที่ `build.bat`
 - `build.bat` default = AI-map update + Debug build/test + Release build/test
 - focused commands: `build.bat debug`, `build.bat release`, `build.bat test <regex>`, `build.bat map`
-- ใช้ incremental work; ห้าม clean/rebuild ทั้งหมดโดยไม่มีเหตุผล
+- `build.bat` และ Ninja ทำ incremental work; ห้าม clean/rebuild ทั้งหมดโดยไม่มีเหตุผล
 
 ## Build and verification
 
 - ทุก slice ต้องมี focused test ระหว่างทำ และ final gate ตามความเสี่ยง
 - failure ต้องเก็บ first useful failure/fingerprint; ห้าม rerun จนบัง flaky failure
-- docs/examples/schema ต้องตรวจ drift กับ public headers
-- `.agent/skills` ต้องผ่าน `aengine.architecture.agent_skills`
-- `.agent/code-map/current` ต้องผ่าน `aengine.architecture.ai_code_map`
-- module contract, dependency cycle, public API ownership และ OOP policy guards ต้องผ่านก่อน completion
+- docs/examples/schema ต้องตรวจ drift กับ public headers เมื่อ source เริ่มมีจริง
+- public-header self-containment ต้องคงผ่านเมื่อ public SDK เปลี่ยน
+- `.agent/skills` ต้องผ่าน `aengine.architecture.agent_skills`; skill แต่ละไฟล์ต้อง focused และไม่เกิน budget
+- `.agent/code-map/current` ต้องผ่าน `aengine.architecture.ai_code_map`; CI ต้อง fail เมื่อ source/manifests กับ committed map drift
+- `aengine.architecture.module_contract`, `dependency_cycle`, `public_api_ownership` และ `oop_policy` ต้องผ่านก่อน completion
 
 ## Shader rules
 
@@ -127,18 +131,23 @@ Skills เป็น procedural overlay เท่านั้นและห้�
 ## UI rules
 
 - A-Engine เป็นเจ้าของ High-level UI API, UI host lifecycle, editor UI infrastructure และ canonical Dear ImGui backend รุ่นแรก
-- APaint เป็นเจ้าของ product panel/dialog/workspace content, view model, controller, defaults, theme values และ presentation policy
-- public boundary ห้าม expose ImGui/SDL/Vulkan native ownership
-- UI อ่าน immutable snapshotและส่ง intentลง canonical controller/workflow route ห้าม mutate domain/GPU ownerตรง
+- APaint เป็นเจ้าของ product panel/dialog/workspace content, view model, controller, defaults, theme values และ presentation policy โดยสร้างผ่าน A-Engine UI API
+- public A-Engine/APaint boundary ห้าม expose `ImGuiContext`, `ImDrawList`, `ImTextureID`, SDL pointer, Vulkan handle หรือ UI descriptor ownership
+- Dear ImGui types อยู่ใน private `aengine_ui_imgui` implementation; APaint ห้ามถือหรือทำลาย UI renderer resources ใน route ที่ migrate แล้ว
+- ใช้ semantic High-level API เป็น default และเพิ่ม limited immediate primitives ตาม consumer จริง ห้ามสร้าง wrapper 1:1 ครบทุก Dear ImGui function
+- UI อ่าน immutable snapshot และส่ง user intent ไป controller/workflow ห้าม mutate document/layer/paint/GPU owner ตรงหรือเก็บ persistent domain state สำเนาคู่แข่ง
+- panel/menu/shortcut command ต้อง dispatch ลง canonical command/workflow route เดียวกัน
+- direct ImGui route ชั่วคราวต้องมี caller inventory, diagnostics, parity proof และ deletion condition ห้ามคงคู่กับ A-Engine UI route หลัง consumer เป็นศูนย์
 
 ## Migration and donor rules
 
-- A-Engine เป็นเจ้าของ reusable mechanism/backend-neutral contract; APaint เป็นเจ้าของ product policy/presets/workspace/`.apaint` semantics
-- ห้าม copy APaint manager tree หรือ link APaint product targetเข้า `aengine_*`
-- ก่อนย้าย donor code ต้องมี provenance/license, current call-path, consumer inventory, source owner, target owner, contract, verification และ deletion condition
-- ย้ายทีละ route ผ่าน adapter; legacy/new routeต้องไม่อยู่คู่กันหลัง consumerเป็นศูนย์
-- ห้าม duplicate active state/ownership ระหว่าง APaint กับ A-Engine
-- รักษางานผู้ใช้ใน dirty worktree และห้าม destructive actionนอก targetที่สั่งชัดเจน
+- A-Engine เป็นเจ้าของ reusable mechanism/backend-neutral contract; APaint เป็นเจ้าของ product UI content/composition, policy, presets, workspace และ `.apaint` semantics
+- ห้าม copy APaint manager tree หรือ link APaint product target เข้า `aengine_*`
+- ก่อนย้าย donor code ต้องมี provenance/license, current call-path, consumer inventory, source owner, target owner/placement, contract, verification และ deletion condition
+- ถ้ายังแยก product policy ออกจาก mechanism ไม่ได้ ให้คง code ไว้ใน APaint และทำ characterization slice ก่อน ห้ามย้ายเพียงเพื่อจัด directory ให้ดูสะอาด
+- ย้ายทีละ route ผ่าน adapter; legacy/new route ต้องไม่อยู่คู่กันหลัง consumer เป็นศูนย์
+- ห้ามสร้าง duplicate active state/ownership ระหว่าง APaint กับ A-Engine
+- รักษางานผู้ใช้ใน dirty worktree และห้าม destructive action นอก target ที่สั่งชัดเจน
 
 ## KnowMan
 

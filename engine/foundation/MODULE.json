@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "module": "aengine_foundation",
+  "kind": "library",
+  "responsibility": "Core IDs, handles, structured results/errors, diagnostics, API version/capabilities, and build identity.",
+  "public_api": [
+    "sdk/include/AEngine/Foundation.h",
+    "sdk/include/AEngine/Foundation"
+  ],
+  "implementation": [
+    "engine/foundation/src"
+  ],
+  "tests": [
+    "aengine.foundation.contract",
+    "aengine.architecture.guard",
+    "aengine.architecture.source_shape",
+    "aengine.architecture.agent_skills",
+    "aengine.info"
+  ],
+  "allowed_dependencies": [],
+  "forbidden_dependencies": [
+    "Vulkan",
+    "SDL",
+    "ImGui",
+    "APaint",
+    "product modules"
+  ],
+  "state_owners": [
+    "DiagnosticLog"
+  ],
+  "entry_points": [
+    "OperationId::New",
+    "GetApiVersion",
+    "GetCapabilities",
+    "GetBuildIdentity"
+  ],
+  "skills": [
+    "software-architecture",
+    "cpp-api-contracts",
+    "validation-evidence"
+  ]
+}

@@ -12,6 +12,7 @@
 - repository นี้ถูกสร้างใหม่แบบ docs-first เมื่อ 2026-08-11
 - canonical architecture คือ `docs/AENGINE_API_ARCHITECTURE.md`
 - A-Engine/APaint ownership contract คือ `docs/AENGINE_APAINT_BOUNDARY.md`
+- High-level UI/ImGui contract คือ `docs/AENGINE_UI_ARCHITECTURE.md`
 - research evidence คือ `docs/RESEARCH_BRIEF.md`
 - APaint เป็น donor/reference consumer ไม่ใช่ dependency ของ A-Engine
 
@@ -20,7 +21,9 @@
 ก่อนสร้างหรือแก้ production code:
 
 1. อ่าน canonical architecture ทั้งไฟล์และ section ของ phase ปัจจุบัน; งาน APaint,
-   donor หรือ migration ต้องอ่าน `docs/AENGINE_APAINT_BOUNDARY.md` เพิ่ม
+   donor หรือ migration ต้องอ่าน `docs/AENGINE_APAINT_BOUNDARY.md` เพิ่ม และงาน UI,
+   editor, panel, viewport widget หรือ Dear ImGui ต้องอ่าน
+   `docs/AENGINE_UI_ARCHITECTURE.md`
 2. ระบุ current phase, user outcome, owner/API, dependency direction, lifetime/state,
    invariants, exact files, tests และ stop line
 3. รักษา MIT license ของ repository และห้ามเดา platform/toolchain/ECS หรือ license
@@ -49,16 +52,34 @@
 - host ABI ต้องตรวจด้วย reflection, generated bindings และ focused GPU/runtime tests
 - ห้าม copy shader/pipeline boilerplateราย effect; ใช้ library/pipeline helperกลาง
 
+## UI rules
+
+- A-Engine เป็นเจ้าของ High-level UI API, UI host lifecycle, editor UI infrastructure
+  และ canonical Dear ImGui backend รุ่นแรก
+- APaint เป็นเจ้าของ product panel/dialog/workspace content, view model, controller,
+  defaults, theme values และ presentation policy โดยสร้างผ่าน A-Engine UI API
+- public A-Engine/APaint boundary ห้าม expose `ImGuiContext`, `ImDrawList`, `ImTextureID`,
+  SDL pointer, Vulkan handle หรือ UI descriptor ownership
+- Dear ImGui typesอยู่ใน private `aengine_ui_imgui` implementation; APaint ห้ามถือหรือ
+  ทำลาย UI renderer resourcesใน routeที่ migrateแล้ว
+- ใช้ semantic High-level APIเป็น default และเพิ่ม limited immediate primitivesตาม
+  consumerจริง ห้ามสร้าง wrapper 1:1 ครบทุก Dear ImGui function
+- UI อ่าน immutable snapshotและส่ง user intentไป controller/workflow ห้าม mutate
+  document/layer/paint/GPU ownerตรงหรือเก็บ persistent domain stateสำเนาคู่แข่ง
+- panel/menu/shortcut commandต้อง dispatchลง canonical command/workflow routeเดียวกัน
+- direct ImGui routeชั่วคราวต้องมี caller inventory, diagnostics, parity proof และ
+  deletion condition ห้ามคงคู่กับ A-Engine UI routeหลัง consumerเป็นศูนย์
+
 ## Migration and donor rules
 
 - A-Engine เป็นเจ้าของ reusable mechanism/backend-neutral contract; APaint เป็นเจ้าของ
-  product UI, policy, presets, workspace และ `.apaint` project semantics
+  product UI content/composition, policy, presets, workspace และ `.apaint` semantics
 - ห้าม copy APaint manager tree หรือ link APaint product targetเข้า `aengine_*`
 - ก่อนย้าย donor code ต้องมี provenance/license, current call-path, consumer inventory,
   source owner, target owner/placement, contract, verification และ deletion condition
 - ถ้ายังแยก product policy ออกจาก mechanismไม่ได้ ให้คง codeไว้ใน APaint และทำ
   characterization sliceก่อน ห้ามย้ายเพียงเพื่อจัด directoryให้ดูสะอาด
-- ย้ายทีละ route ผ่าน adapter; legacy/new route ต้องไม่อยู่คู่กันหลัง consumerเป็นศูนย์
+- ย้ายทีละ route ผ่าน adapter; legacy/new routeต้องไม่อยู่คู่กันหลัง consumerเป็นศูนย์
 - ห้ามสร้าง duplicate active state/ownership ระหว่าง APaint กับ A-Engine
 - รักษางานผู้ใช้ใน dirty worktree และห้าม destructive actionนอก targetที่สั่งชัดเจน
 

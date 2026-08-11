@@ -15,6 +15,7 @@ Load only the skills relevant to the current slice:
 | Skill | Use when |
 | --- | --- |
 | `software-architecture` | module boundaries, ownership, lifecycle, composition root, new subsystem or Phase planning |
+| `cpp-oop-design` | class/state/resource ownership, RAII, composition, DI, interface or inheritance design |
 | `cpp-api-contracts` | public C++ headers, Result/Error, handles, ABI-facing values, service interfaces |
 | `validation-evidence` | build/test/CI, regression evidence, failure triage, completion claims |
 | `third-party-governance` | first or changed dependency, license/provenance, lock/SBOM policy |
@@ -22,4 +23,4 @@ Load only the skills relevant to the current slice:
 | `ui-architecture` | High-level UI API, ImGui backend, panel/menu/viewport infrastructure |
 | `apaint-migration` | APaint donor/reference study, adapter migration, ownership transfer |
 
-Do not load every skill by default. Small context and explicit ownership make AI review more reliable.
+Do not load every skill by default. Small context and explicit ownership make AI review more reliableค่ะ

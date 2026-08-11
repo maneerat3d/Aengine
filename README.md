@@ -17,6 +17,7 @@ Recycle Bin การเริ่มใหม่ครั้งนี้ไม�
 เอกสารหลัก:
 
 - [A-Engine API Architecture](docs/AENGINE_API_ARCHITECTURE.md)
+- [A-Engine / APaint Ownership Boundary](docs/AENGINE_APAINT_BOUNDARY.md)
 - [Research Brief](docs/RESEARCH_BRIEF.md)
 
 ## Developer experience เป้าหมาย
@@ -50,6 +51,8 @@ global singleton, Vulkan handle หรือ privileged path
 - shader ใช้ textual shader language และ reusable function library; ไม่ใช้ shader node
 - engine-owned modulesเริ่ม static/private link ได้; public add-onใช้ dynamic library
   ผ่าน stable C ABI และ C++/C# SDK wrappers
+- A-Engine เป็นเจ้าของ reusable mechanisms; APaint เป็นเจ้าของ product UI, policy,
+  presets และ `.apaint` project semantics
 - APaint เป็น donor/reference consumer ไม่ใช่ dependency ของ A-Engine
 - สร้างทีละ vertical slice พร้อม tests, runtime evidence และ deletion condition
 - schema, diagnostics และ examples ต้อง machine-readable/ตรวจ drift ได้ เพื่อให้ AI

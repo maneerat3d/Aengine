@@ -1,5 +1,7 @@
 add_library(aengine_foundation STATIC
-    src/Foundation.cpp
+    src/Diagnostics.cpp
+    src/Operation.cpp
+    src/Version.cpp
 )
 
 add_library(AEngine::Foundation ALIAS aengine_foundation)

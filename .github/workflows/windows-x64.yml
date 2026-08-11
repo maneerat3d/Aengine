@@ -5,6 +5,10 @@ on:
   pull_request:
   workflow_dispatch:
 
+concurrency:
+  group: windows-x64-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
 jobs:
   foundation:
     runs-on: [self-hosted, windows, x64]

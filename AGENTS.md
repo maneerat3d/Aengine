@@ -13,6 +13,7 @@
 - canonical architecture คือ `docs/AENGINE_API_ARCHITECTURE.md`
 - A-Engine/APaint ownership contract คือ `docs/AENGINE_APAINT_BOUNDARY.md`
 - High-level UI/ImGui contract คือ `docs/AENGINE_UI_ARCHITECTURE.md`
+- code shape/AI reviewability contract คือ `docs/CODE_SHAPE_POLICY.md`
 - research evidence คือ `docs/RESEARCH_BRIEF.md`
 - APaint เป็น donor/reference consumer ไม่ใช่ dependency ของ A-Engine
 
@@ -31,9 +32,26 @@
 4. สร้าง vertical slice ที่มี consumer จริง ห้าม scaffold ทุก module ล่วงหน้า
 5. public API ห้าม expose Vulkan, SDL, ImGui, ECS implementation pointer หรือ global
    service locator
+6. อ่าน `docs/CODE_SHAPE_POLICY.md` และรักษา source-shape budgets/semantic split rules
+   ทุกครั้งที่เพิ่ม class, public header, implementation owner หรือ composition root
 
 ถ้า docs ขัดกับ source หรือไม่มี proof ที่วัด behavior ได้ ให้หยุด production change และ
 ทำ docs/diagnostic/characterization slice ก่อน
+
+## Code shape / AI reviewability
+
+- ใช้ Single Responsibility และ Composition เป็น default; ห้าม God class หรือ manager
+  กลางที่ถือ mutable state ของหลาย subsystem
+- แยก state owner, orchestration, policy/strategy, backend adapter, serialization และ UI
+  ออกจากกันเมื่อมีเหตุผลเปลี่ยนแปลงคนละอย่าง
+- composition root มีหน้าที่ wiring เท่านั้น ห้ามซ่อน domain behavior
+- facade ต้อง delegate ไป service owner และห้ามสร้าง duplicate state
+- public header ควรมี primary contract เดียวกับ value types ที่เกี่ยวข้องโดยตรง
+- ห้ามสร้าง dumping-ground file เช่น `Common`, `Misc`, `Everything` หรือ unscoped `Utils`
+- source file ถึง limit ใน `docs/CODE_SHAPE_POLICY.md` ต้อง split ก่อนเพิ่ม behavior; limit
+  เป็น hard stop ไม่ใช่เป้าหมาย
+- `aengine.architecture.source_shape` ต้องผ่านทุก slice; exception ต้องมี owner,
+  rationale, temporary budget และ removal/review phase แบบ explicit
 
 ## Build and verification
 

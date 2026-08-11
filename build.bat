@@ -5,7 +5,7 @@ pushd "%~dp0"
 set "AENGINE_COMMAND=%~1"
 if not defined AENGINE_COMMAND set "AENGINE_COMMAND=all"
 
-if /I "%AENGINE_COMMAND%"=="help" goto :help
+if /I "%AENGINE_COMMAND%"=="help" goto :show_help
 if /I "%AENGINE_COMMAND%"=="map" goto :map_only
 if /I "%AENGINE_COMMAND%"=="debug" goto :debug
 if /I "%AENGINE_COMMAND%"=="release" goto :release
@@ -13,7 +13,9 @@ if /I "%AENGINE_COMMAND%"=="all" goto :all
 if /I "%AENGINE_COMMAND%"=="test" goto :test
 
 echo ERROR: unknown build command "%AENGINE_COMMAND%".
-goto :help_error
+call :print_help
+popd
+exit /b 2
 
 :map_only
 call :update_ai_map
@@ -117,7 +119,11 @@ ctest --preset %AENGINE_PRESET%
 if errorlevel 1 exit /b %errorlevel%
 exit /b 0
 
-:help
+:show_help
+call :print_help
+goto :success
+
+:print_help
 echo A-Engine canonical build entrypoint
 echo.
 echo   build.bat              Update AI map, Debug build/test, Release build/test
@@ -125,11 +131,7 @@ echo   build.bat debug        Update AI map, Debug build/test
 echo   build.bat release      Update AI map, Release build/test
 echo   build.bat test REGEX   Update AI map, Debug build, focused CTest regex
 echo   build.bat map          Update AI code map only when inputs changed
-goto :success
-
-:help_error
-call :help
-exit /b 2
+exit /b 0
 
 :failed
 set "AENGINE_EXIT=%errorlevel%"

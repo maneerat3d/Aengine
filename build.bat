@@ -73,10 +73,11 @@ if errorlevel 1 exit /b %errorlevel%
 
 if /I "%GITHUB_ACTIONS%"=="true" (
     set "AENGINE_AI_MAP_DIRTY="
-    for /f "delims=" %%i in ('git status --porcelain -- ".agent/code-map/current"') do set "AENGINE_AI_MAP_DIRTY=1"
+    git diff --quiet -- ".agent/code-map/current"
+    if errorlevel 1 set "AENGINE_AI_MAP_DIRTY=1"
+    for /f "delims=" %%i in ('git ls-files --others --exclude-standard ".agent/code-map/current"') do set "AENGINE_AI_MAP_DIRTY=1"
     if defined AENGINE_AI_MAP_DIRTY (
         echo ERROR: AI code map is stale. Run .\build.bat map and commit the generated changes.
-        git status --short -- ".agent/code-map/current"
         git diff -- ".agent/code-map/current"
         for /f "delims=" %%f in ('git ls-files --others --exclude-standard ".agent/code-map/current"') do (
             set "AENGINE_MAP_FILE=%%f"

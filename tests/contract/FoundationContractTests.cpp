@@ -1,5 +1,6 @@
 #include <AEngine/Foundation.h>
 
+#include <cstdint>
 #include <cstdlib>
 #include <iostream>
 #include <string>
@@ -14,6 +15,8 @@ using DocumentHandle = aengine::Handle<DocumentTag>;
 using LayerHandle = aengine::Handle<LayerTag>;
 
 static_assert(!std::is_convertible_v<DocumentHandle, LayerHandle>);
+static_assert(std::is_trivially_copyable_v<aengine::MonotonicTimePoint>);
+static_assert(sizeof(aengine::MonotonicTimePoint) == sizeof(std::int64_t));
 
 void Require(bool condition, const char* message) {
     if (!condition) {
@@ -67,6 +70,12 @@ void TestResultAndOperationContracts() {
     Require(static_cast<bool>(succeeded), "void success result must contain a value");
 }
 
+void TestTimeMetadata() {
+    constexpr aengine::MonotonicTimePoint timestamp{42};
+    Require(timestamp.nanoseconds == 42,
+            "monotonic time metadata must preserve fixed-width nanoseconds");
+}
+
 void TestCapabilitiesAndJobValues() {
     const auto capabilities = aengine::GetCapabilities();
     Require(capabilities.Supports(aengine::Capability::Foundation),
@@ -96,6 +105,7 @@ void TestDiagnostics() {
 int main() {
     TestHandleGeneration();
     TestResultAndOperationContracts();
+    TestTimeMetadata();
     TestCapabilitiesAndJobValues();
     TestDiagnostics();
     return 0;

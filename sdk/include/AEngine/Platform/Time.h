@@ -1,15 +1,11 @@
 #pragma once
 
 #include <AEngine/Foundation/Result.h>
+#include <AEngine/Foundation/Time.h>
 
-#include <cstdint>
 #include <memory>
 
 namespace aengine {
-
-struct MonotonicTimePoint {
-    std::int64_t nanoseconds = 0;
-};
 
 class ITimeSource {
 public:

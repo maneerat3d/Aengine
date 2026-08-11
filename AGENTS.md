@@ -14,6 +14,7 @@
 - A-Engine/APaint ownership contract คือ `docs/AENGINE_APAINT_BOUNDARY.md`
 - High-level UI/ImGui contract คือ `docs/AENGINE_UI_ARCHITECTURE.md`
 - code shape/AI reviewability contract คือ `docs/CODE_SHAPE_POLICY.md`
+- project-specific AI skills อยู่ที่ `.agent/skills/`
 - research evidence คือ `docs/RESEARCH_BRIEF.md`
 - APaint เป็น donor/reference consumer ไม่ใช่ dependency ของ A-Engine
 
@@ -34,9 +35,29 @@
    service locator
 6. อ่าน `docs/CODE_SHAPE_POLICY.md` และรักษา source-shape budgets/semantic split rules
    ทุกครั้งที่เพิ่ม class, public header, implementation owner หรือ composition root
+7. เลือกอ่าน skill ที่เกี่ยวข้องจาก `.agent/skills/README.md`; อย่าโหลดทุก skill โดยไม่จำเป็น
 
 ถ้า docs ขัดกับ source หรือไม่มี proof ที่วัด behavior ได้ ให้หยุด production change และ
 ทำ docs/diagnostic/characterization slice ก่อน
+
+## Skill routing
+
+Skills เป็น procedural overlay เท่านั้นและห้าม override canonical docs/source-of-truth:
+
+- module boundary, ownership, lifecycle, composition root, new subsystem/refactor ->
+  `.agent/skills/software-architecture/SKILL.md`
+- public C++ API/header, Result/Error, handle, service contract, ABI-facing value ->
+  `.agent/skills/cpp-api-contracts/SKILL.md`
+- build/test/CI, failure triage, evidence/completion claim ->
+  `.agent/skills/validation-evidence/SKILL.md`
+- dependency/version/license/provenance/SBOM ->
+  `.agent/skills/third-party-governance/SKILL.md`
+- Vulkan/GPU/shader/pipeline/backend -> `.agent/skills/vulkan-backend/SKILL.md`
+- UI/editor/ImGui/panel/menu/viewport -> `.agent/skills/ui-architecture/SKILL.md`
+- APaint donor/reference/migration -> `.agent/skills/apaint-migration/SKILL.md`
+
+งานที่ข้ามหลาย concern ให้อ่านเฉพาะ skill ที่ข้ามจริง และทุกงานที่อ้างว่าเสร็จต้องใช้
+`validation-evidence` ตรวจ completion evidence ค่ะ
 
 ## Code shape / AI reviewability
 
@@ -61,6 +82,8 @@
 - ทุก slice ต้องมี focused test ระหว่างทำ และ final gate ตามความเสี่ยง
 - failure ต้องเก็บ structured evidence/fingerprint; ห้าม rerun จนบัง flaky failure
 - docs/examples/schema ต้องตรวจ drift กับ public headers เมื่อ source เริ่มมีจริง
+- `.agent/skills` ต้องผ่าน `aengine.architecture.agent_skills`; skill แต่ละไฟล์ต้อง focused
+  และไม่เกิน budget ที่ guard กำหนด
 
 ## Shader rules
 

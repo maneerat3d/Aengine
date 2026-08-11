@@ -41,6 +41,16 @@ set_tests_properties(aengine.architecture.source_shape PROPERTIES
 )
 
 add_test(
+    NAME aengine.architecture.agent_skills
+    COMMAND ${CMAKE_COMMAND}
+        -DAENGINE_SOURCE_DIR=${PROJECT_SOURCE_DIR}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/architecture/VerifyAgentSkills.cmake
+)
+set_tests_properties(aengine.architecture.agent_skills PROPERTIES
+    LABELS "architecture;agent-skills;foundation"
+)
+
+add_test(
     NAME aengine.info
     COMMAND aengine_info
 )

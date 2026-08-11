@@ -19,8 +19,11 @@ Recycle Bin การเริ่มใหม่ครั้งนี้ไม�
 - [A-Engine API Architecture](docs/AENGINE_API_ARCHITECTURE.md)
 - [A-Engine / APaint Ownership Boundary](docs/AENGINE_APAINT_BOUNDARY.md)
 - [A-Engine High-level UI Architecture](docs/AENGINE_UI_ARCHITECTURE.md)
+- [Code Shape Policy](docs/CODE_SHAPE_POLICY.md)
+- [Agent Skills](.agent/skills/README.md)
+- [Generated AI Context](.agent/code-map/current/AI_CONTEXT.md)
 - [Research Brief](docs/RESEARCH_BRIEF.md)
-- [Phase 0 Approval Package](docs/PHASE_0_APPROVAL.md) — ข้อเสนอที่ต้องอนุมัติก่อนสร้าง production code
+- [Phase 0 Approval Package](docs/PHASE_0_APPROVAL.md)
 
 ## Developer experience เป้าหมาย
 
@@ -60,8 +63,8 @@ global singleton, Vulkan handle หรือ privileged path
   policy, presets และ `.apaint` project semantics
 - APaint เป็น donor/reference consumer ไม่ใช่ dependency ของ A-Engine
 - สร้างทีละ vertical slice พร้อม tests, runtime evidence และ deletion condition
-- schema, diagnostics และ examples ต้อง machine-readable/ตรวจ drift ได้ เพื่อให้ AI
-  ไม่ต้องเดา architecture จากชื่อ class หรือเอกสารเก่า
+- schema, diagnostics, examples และ AI code map ต้อง machine-readable/ตรวจ drift ได้
+  เพื่อให้ AI ไม่ต้องเดา architecture จากชื่อ class หรือเอกสารเก่า
 
 ## ลำดับสร้าง
 
@@ -76,15 +79,46 @@ Phase 0 approval ถูกบันทึกใน [Phase 0 Approval Package](do
 และ Phase 1 เริ่มจาก foundation แบบ dependency-free ก่อนเพิ่ม platform, renderer หรือ
 product scaffold.
 
-## Build และ test (Phase 1)
+## Build และ test
 
-เปิด Visual Studio x64 developer PowerShell แล้วรัน:
+**ใช้ `build.bat` จาก repository root เป็น entrypoint เดียว** ทั้งคน, AI agent และ CI
+ห้ามเรียก CMake/Ninja/CTest โดยตรงใน normal workflow
 
-```powershell
-cmake --preset windows-x64-debug
-cmake --build --preset windows-x64-debug --parallel
-ctest --preset windows-x64-debug
+```bat
+build.bat
 ```
 
-consumer แรกคือ `aengine_info` ซึ่งอ่าน version/capabilities ผ่าน public header
-เท่านั้น และ Phase 1 ไม่มี dependency นอก C++ standard library.
+คำสั่งที่รองรับ:
+
+```bat
+build.bat                 rem AI map + Debug build/test + Release build/test
+build.bat debug           rem AI map + Debug build/test
+build.bat release         rem AI map + Release build/test
+build.bat test REGEX      rem AI map + Debug build + focused CTest regex
+build.bat map             rem update AI navigation map only when needed
+```
+
+`build.bat` pin Visual Studio 2022 17.14 / MSVC 19.44 toolset 14.44 / Windows SDK
+10.0.26100.0 แล้วใช้ CMake presets + Ninja แบบ incremental ภายใน
+
+## AI Code Map
+
+production target ใต้ `engine/` และ `tools/` ต้องมี `MODULE.json` ที่ประกาศ ownership,
+dependency, tests, entry points และ skill routing ส่วน source/CMake/tests คือ observed reality
+
+`build.bat` จะ fingerprint input เหล่านี้และ regenerate `.agent/code-map/current/` เมื่อมี
+การเปลี่ยนแปลง แต่จะเขียนไฟล์ใหม่เฉพาะเมื่อ navigation structure ที่ AI ต้องรู้เปลี่ยนจริง
+จึงไม่สร้าง Git noise เมื่อแก้ body ของ implementation ธรรมดา
+
+AI ควรเริ่มจาก:
+
+1. `AGENTS.md`
+2. skill ที่เกี่ยวข้อง
+3. `.agent/code-map/current/AI_CONTEXT.md`
+4. `.agent/code-map/current/INDEX.json`
+5. `modules/<target>.json` ของ module ที่เกี่ยวข้อง
+6. public contract + focused tests
+7. implementation เฉพาะ route ที่ต้องแก้
+
+consumer แรกคือ `aengine_info` ซึ่งอ่าน version/capabilities ผ่าน public header เท่านั้น
+และ Phase 1 ไม่มี dependency นอก C++ standard library.

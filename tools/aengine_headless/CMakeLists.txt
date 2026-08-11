@@ -1,0 +1,3 @@
+add_executable(aengine_headless main.cpp)
+target_link_libraries(aengine_headless PRIVATE AEngine::Platform)
+target_compile_features(aengine_headless PRIVATE cxx_std_20)

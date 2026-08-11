@@ -1,7 +1,8 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "module": "aengine_foundation",
   "kind": "library",
+  "owner": "AEngine/Foundation",
   "responsibility": "Core IDs, handles, structured results/errors, diagnostics, API version/capabilities, and build identity.",
   "public_api": [
     "sdk/include/AEngine/Foundation.h",
@@ -17,6 +18,10 @@
     "aengine.architecture.agent_skills",
     "aengine.architecture.build_entrypoint",
     "aengine.architecture.ai_code_map",
+    "aengine.architecture.module_contract",
+    "aengine.architecture.dependency_cycle",
+    "aengine.architecture.public_api_ownership",
+    "aengine.architecture.oop_policy",
     "aengine.info"
   ],
   "allowed_dependencies": [],
@@ -28,7 +33,44 @@
     "product modules"
   ],
   "state_owners": [
-    "DiagnosticLog"
+    "DiagnosticLog",
+    "HandlePool<T>"
+  ],
+  "lifetime": {
+    "scope": "instance/process foundation values",
+    "creation": "explicit consumer construction or value creation; no global runtime owner",
+    "shutdown": "RAII/value destruction with no dependency-owned shutdown sequence"
+  },
+  "threading": {
+    "affinity": "no module-wide thread affinity",
+    "concurrency": "OperationId generation is thread-safe; mutable instance owners require their documented caller synchronization"
+  },
+  "mutation_gateway": [
+    "DiagnosticLog::Record",
+    "HandlePool<T>::Insert",
+    "HandlePool<T>::Erase"
+  ],
+  "invariants": [
+    {
+      "id": "FND-001",
+      "text": "Foundation remains independent from platform, renderer, UI, APaint, and third-party runtime dependencies.",
+      "test": "aengine.architecture.guard"
+    },
+    {
+      "id": "FND-002",
+      "text": "Stale or forged typed handles never resolve as live values.",
+      "test": "aengine.foundation.contract"
+    },
+    {
+      "id": "FND-003",
+      "text": "Structured errors preserve owner and operation identity across Result failure paths.",
+      "test": "aengine.foundation.contract"
+    },
+    {
+      "id": "FND-004",
+      "text": "DiagnosticLog is instance-owned, bounded, and discards the oldest breadcrumb at capacity.",
+      "test": "aengine.foundation.contract"
+    }
   ],
   "entry_points": [
     "OperationId::New",
@@ -38,7 +80,13 @@
   ],
   "skills": [
     "software-architecture",
+    "cpp-oop-design",
     "cpp-api-contracts",
     "validation-evidence"
+  ],
+  "stop_line": [
+    "application/platform lifecycle",
+    "renderer/GPU/backend ownership",
+    "scene/game/editor/product behavior"
   ]
 }

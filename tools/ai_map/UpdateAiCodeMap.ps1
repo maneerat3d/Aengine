@@ -84,7 +84,7 @@ foreach ($map in $moduleMaps) {
 Write-AiUtf8 (Join-Path $generatedRoot "AI_CONTEXT.md") (($context -join "`n") + "`n")
 
 if ($Mode -eq "Check") {
-    $differences = Compare-AiGeneratedDirectory $generatedRoot $currentRoot
+    $differences = @(Compare-AiGeneratedDirectory $generatedRoot $currentRoot)
     if ($differences.Count -gt 0) {
         Write-Host "AI code map drift detected:" -ForegroundColor Red
         $differences | ForEach-Object { Write-Host "  $_" -ForegroundColor Red }

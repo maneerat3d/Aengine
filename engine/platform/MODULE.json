@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "module": "aengine_platform",
+  "kind": "library",
+  "responsibility": "Application lifecycle facade, headless frame pumping, lifecycle state ownership, deterministic application trace, and application composition wiring.",
+  "public_api": [
+    "sdk/include/AEngine/Application.h",
+    "sdk/include/AEngine/Application"
+  ],
+  "implementation": [
+    "engine/platform/src"
+  ],
+  "tests": [
+    "aengine.platform.contract",
+    "aengine.architecture.guard",
+    "aengine.architecture.source_shape",
+    "aengine.architecture.ai_code_map",
+    "aengine.headless"
+  ],
+  "allowed_dependencies": [
+    "aengine_foundation"
+  ],
+  "forbidden_dependencies": [
+    "Vulkan",
+    "SDL",
+    "ImGui",
+    "APaint",
+    "scene/game/editor/domain behavior"
+  ],
+  "state_owners": [
+    "ApplicationLifecycle",
+    "ApplicationTraceBuffer"
+  ],
+  "entry_points": [
+    "App::Init",
+    "App::Run",
+    "App::PumpFrame",
+    "App::Quit"
+  ],
+  "skills": [
+    "software-architecture",
+    "cpp-api-contracts",
+    "validation-evidence"
+  ]
+}

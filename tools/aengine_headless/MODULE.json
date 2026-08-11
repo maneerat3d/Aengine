@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "module": "aengine_headless",
+  "kind": "tool",
+  "responsibility": "Headless public-SDK consumer that proves deterministic manual frame pumping, quit, and safe-boundary stop semantics.",
+  "public_api": [],
+  "implementation": [
+    "tools/aengine_headless/main.cpp"
+  ],
+  "tests": [
+    "aengine.headless"
+  ],
+  "allowed_dependencies": [
+    "aengine_platform"
+  ],
+  "forbidden_dependencies": [
+    "Vulkan",
+    "SDL",
+    "ImGui",
+    "APaint"
+  ],
+  "state_owners": [],
+  "entry_points": [
+    "main"
+  ],
+  "skills": [
+    "cpp-api-contracts",
+    "validation-evidence"
+  ]
+}

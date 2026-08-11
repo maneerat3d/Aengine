@@ -3,10 +3,11 @@
   "module": "aengine_platform",
   "kind": "library",
   "owner": "AEngine/Platform",
-  "responsibility": "Application lifecycle facade, headless frame pumping, lifecycle state ownership, deterministic application trace, and application composition wiring.",
+  "responsibility": "Application lifecycle facade, headless frame pumping, deterministic application trace, composition wiring, and backend-neutral platform ports beginning with monotonic time.",
   "public_api": [
     "sdk/include/AEngine/Application.h",
-    "sdk/include/AEngine/Application"
+    "sdk/include/AEngine/Application",
+    "sdk/include/AEngine/Platform"
   ],
   "implementation": [
     "engine/platform/src"
@@ -37,13 +38,13 @@
     "ApplicationTraceBuffer"
   ],
   "lifetime": {
-    "scope": "one App instance",
-    "creation": "App::Init creates ApplicationRuntime through the explicit composition root",
-    "shutdown": "Quit is a request; Stopped is reached at a frame boundary or explicit runtime shutdown, then RAII destroys the runtime"
+    "scope": "one App instance plus caller-owned platform port objects",
+    "creation": "App::Init creates ApplicationRuntime through the explicit composition root; CreateMonotonicTimeSource creates a caller-owned time source",
+    "shutdown": "Quit is a request; Stopped is reached at a frame boundary or explicit runtime shutdown; caller-owned time sources are released by RAII"
   },
   "threading": {
-    "affinity": "application owner thread",
-    "concurrency": "Run owns the loop while active; PumpFrame is rejected during Run and no concurrent mutation route is provided"
+    "affinity": "application owner thread for App; current time-port consumers use their owning caller thread",
+    "concurrency": "Run owns the loop while active; PumpFrame is rejected during Run; the time port exposes no mutable state or cross-thread callback route"
   },
   "mutation_gateway": [
     "App::PumpFrame",
@@ -70,13 +71,20 @@
       "id": "APP-004",
       "text": "Headless manual pumping produces deterministic frame and lifecycle trace ordering through the public SDK.",
       "test": "aengine.headless"
+    },
+    {
+      "id": "APP-005",
+      "text": "The public time port is backend-neutral and the production monotonic adapter never reports time moving backwards for sequential samples.",
+      "test": "aengine.platform.contract"
     }
   ],
   "entry_points": [
     "App::Init",
     "App::Run",
     "App::PumpFrame",
-    "App::Quit"
+    "App::Quit",
+    "ITimeSource::Now",
+    "CreateMonotonicTimeSource"
   ],
   "skills": [
     "software-architecture",
@@ -85,7 +93,7 @@
     "validation-evidence"
   ],
   "stop_line": [
-    "window/input/time/filesystem ports",
+    "window/input/filesystem ports",
     "ApplicationServices injection",
     "SDL/Vulkan/ImGui adapters",
     "scene/game/editor/domain behavior"

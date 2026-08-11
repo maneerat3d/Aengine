@@ -53,7 +53,7 @@ foreach ($file in ($manifestFiles | Sort-Object FullName)) {
     foreach ($field in @("module", "kind", "owner", "responsibility")) {
         [void](Require-Text $manifest $field $module)
     }
-    if ($manifest.owner -match '^(?i:tbd|unknown|none)$') {
+    if ((Has-Property $manifest "owner") -and [string]$manifest.owner -match '^(?i:tbd|unknown|none)$') {
         Add-Error "$module owner must be a stable subsystem owner, not '$($manifest.owner)'"
     }
 
@@ -110,8 +110,8 @@ foreach ($file in ($manifestFiles | Sort-Object FullName)) {
         else { $stateOwners[$name] = $module }
     }
 
-    if (@($manifest.state_owners).Count -gt 0 -and
-        @($manifest.mutation_gateway | ForEach-Object { ([string]$_).ToLowerInvariant() }) -eq @("none")) {
+    $gateways = @($manifest.mutation_gateway | ForEach-Object { ([string]$_).ToLowerInvariant() })
+    if (@($manifest.state_owners).Count -gt 0 -and $gateways.Count -eq 1 -and $gateways[0] -eq "none") {
         Add-Error "$module owns mutable state but mutation_gateway is none"
     }
 

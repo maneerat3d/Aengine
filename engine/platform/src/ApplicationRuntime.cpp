@@ -2,13 +2,16 @@
 
 #include <AEngine/Foundation/Error.h>
 
+#include <utility>
+
 namespace aengine::detail {
 
 namespace {
 constexpr const char* kOwner = "aengine_platform";
 }
 
-ApplicationRuntime::ApplicationRuntime() noexcept {
+ApplicationRuntime::ApplicationRuntime(ApplicationPlatformServices&& services) noexcept
+    : services_(std::move(services)) {
     trace_.Record(ApplicationTraceEvent::Initialized, frameIndex_);
 }
 
@@ -66,9 +69,14 @@ ApplicationTraceView ApplicationRuntime::Trace() const noexcept {
     return trace_.View();
 }
 
+FrameTimeSample ApplicationRuntime::CurrentFrameTime() const noexcept {
+    return frameTime_;
+}
+
 Result<bool> ApplicationRuntime::PumpOwnedFrame() {
     switch (lifecycle_.ReachFrameBoundary()) {
     case FrameBoundaryDecision::PumpFrame:
+        frameTime_ = services_.Time().AdvanceFrame();
         ++frameIndex_;
         trace_.Record(ApplicationTraceEvent::FramePumped, frameIndex_);
         return Result<bool>::Success(true);

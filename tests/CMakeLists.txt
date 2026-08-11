@@ -10,6 +10,15 @@ add_executable(aengine_platform_contract_tests
 target_link_libraries(aengine_platform_contract_tests PRIVATE AEngine::Platform)
 target_compile_features(aengine_platform_contract_tests PRIVATE cxx_std_20)
 
+add_executable(aengine_platform_services_tests
+    contract/ApplicationPlatformServicesTests.cpp
+)
+target_link_libraries(aengine_platform_services_tests PRIVATE AEngine::Platform)
+target_include_directories(aengine_platform_services_tests PRIVATE
+    ${PROJECT_SOURCE_DIR}/engine/platform/src
+)
+target_compile_features(aengine_platform_services_tests PRIVATE cxx_std_20)
+
 add_library(aengine_header_self_containment OBJECT
     headers/AbiHeader.cpp
     headers/AppConfigHeader.cpp
@@ -35,6 +44,9 @@ set_tests_properties(aengine.foundation.contract PROPERTIES LABELS "contract;fou
 
 add_test(NAME aengine.platform.contract COMMAND aengine_platform_contract_tests)
 set_tests_properties(aengine.platform.contract PROPERTIES LABELS "contract;platform")
+
+add_test(NAME aengine.platform.services COMMAND aengine_platform_services_tests)
+set_tests_properties(aengine.platform.services PROPERTIES LABELS "contract;platform;services")
 
 add_test(
     NAME aengine.architecture.guard

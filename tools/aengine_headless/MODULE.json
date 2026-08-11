@@ -3,7 +3,7 @@
   "module": "aengine_headless",
   "kind": "tool",
   "owner": "AEngine/Tooling",
-  "responsibility": "Headless public-SDK consumer that proves deterministic manual frame pumping, quit, and safe-boundary stop semantics.",
+  "responsibility": "Headless public-SDK consumer that proves deterministic manual frame pumping, quit safe-boundary semantics, and the production monotonic time port.",
   "public_api": [],
   "implementation": [
     "tools/aengine_headless/main.cpp"
@@ -22,9 +22,9 @@
   ],
   "state_owners": [],
   "lifetime": {
-    "scope": "process-owned App consumer",
-    "creation": "main calls App::Init through the public SDK",
-    "shutdown": "main requests Quit, pumps the safe boundary, then App RAII destruction ends before process exit"
+    "scope": "process-owned App and monotonic time-source consumer",
+    "creation": "main creates the time source and App through public A-Engine SDK factories",
+    "shutdown": "main requests Quit, pumps the safe boundary, then caller-owned time source and App release through RAII before process exit"
   },
   "threading": {
     "affinity": "main application thread",
@@ -42,6 +42,11 @@
     {
       "id": "HDL-002",
       "text": "The headless consumer accesses application lifecycle only through public A-Engine SDK headers.",
+      "test": "aengine.headless"
+    },
+    {
+      "id": "HDL-003",
+      "text": "The headless consumer samples the production monotonic time port through the public SDK and rejects a backwards sample.",
       "test": "aengine.headless"
     }
   ],

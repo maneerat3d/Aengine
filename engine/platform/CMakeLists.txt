@@ -4,6 +4,7 @@ add_library(aengine_platform STATIC
     src/ApplicationLifecycle.cpp
     src/ApplicationRuntime.cpp
     src/ApplicationTraceBuffer.cpp
+    src/Time.cpp
 )
 
 add_library(AEngine::Platform ALIAS aengine_platform)

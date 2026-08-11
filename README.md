@@ -17,6 +17,8 @@ Recycle Bin การเริ่มใหม่ครั้งนี้ไม�
 เอกสารหลัก:
 
 - [A-Engine API Architecture](docs/AENGINE_API_ARCHITECTURE.md)
+- [A-Engine / APaint Ownership Boundary](docs/AENGINE_APAINT_BOUNDARY.md)
+- [A-Engine High-level UI Architecture](docs/AENGINE_UI_ARCHITECTURE.md)
 - [Research Brief](docs/RESEARCH_BRIEF.md)
 
 ## Developer experience เป้าหมาย
@@ -45,11 +47,16 @@ global singleton, Vulkan handle หรือ privileged path
 
 ## หลักการ
 
-- public API เป็น backend-neutral; Vulkan/SDL/UI implementation อยู่หลัง ports
+- public API เป็น backend-neutral; Vulkan, SDL, Dear ImGui และ UI-renderer resources
+  อยู่หลัง typed contracts/ports
 - low-level typed API และ high-level workflow API ใช้ source of truth เดียวกัน
 - shader ใช้ textual shader language และ reusable function library; ไม่ใช้ shader node
 - engine-owned modulesเริ่ม static/private link ได้; public add-onใช้ dynamic library
   ผ่าน stable C ABI และ C++/C# SDK wrappers
+- A-Engine เป็นเจ้าของ High-level UI API และ canonical Dear ImGui backend รุ่นแรก;
+  APaint สร้าง product panels/dialogs/workspacesผ่าน API นี้โดยไม่ถือ native UI/GPU state
+- A-Engine เป็นเจ้าของ reusable mechanisms; APaint เป็นเจ้าของ product UI content,
+  policy, presets และ `.apaint` project semantics
 - APaint เป็น donor/reference consumer ไม่ใช่ dependency ของ A-Engine
 - สร้างทีละ vertical slice พร้อม tests, runtime evidence และ deletion condition
 - schema, diagnostics และ examples ต้อง machine-readable/ตรวจ drift ได้ เพื่อให้ AI
@@ -62,7 +69,7 @@ global singleton, Vulkan handle หรือ privileged path
 3. Phase 2 — `App::Init`, `Run`, `PumpFrame`, `Quit` และ headless lifecycle
 4. Phase 3 — world, scene, asset และ glTF viewer slice
 5. Phase 4 — renderer, shader library, Vulkan backend และ `View3D`
-6. Phase 5+ — workflows/editor/add-ons แล้วจึงทยอยย้าย APaint และ feature packs
+6. Phase 5+ — High-level UI/workflows/editor/add-ons แล้วจึงทยอยย้าย APaint และ feature packs
 
 ยังไม่สร้าง CMake/source scaffold จนกว่า Phase 0 decisions ที่เหลือจะได้รับการอนุมัติ
 เพราะ scaffold ที่ไม่มี approved compiler/platform/build policy จะกลายเป็นหนี้ตั้งแต่

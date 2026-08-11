@@ -79,8 +79,10 @@ if /I "%GITHUB_ACTIONS%"=="true" (
         git status --short -- ".agent/code-map/current"
         git diff -- ".agent/code-map/current"
         for /f "delims=" %%f in ('git ls-files --others --exclude-standard ".agent/code-map/current"') do (
-            echo ----- %%f -----
-            type "%%f"
+            set "AENGINE_MAP_FILE=%%f"
+            set "AENGINE_MAP_FILE=!AENGINE_MAP_FILE:/=\!"
+            echo ----- !AENGINE_MAP_FILE! -----
+            type "!AENGINE_MAP_FILE!"
         )
         exit /b 4
     )

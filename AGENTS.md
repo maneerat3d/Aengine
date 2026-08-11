@@ -11,6 +11,7 @@
 - A-Engine เป็น open-source C++ 3D engine สำหรับ game และ 3D application
 - repository นี้ถูกสร้างใหม่แบบ docs-first เมื่อ 2026-08-11
 - canonical architecture คือ `docs/AENGINE_API_ARCHITECTURE.md`
+- A-Engine/APaint ownership contract คือ `docs/AENGINE_APAINT_BOUNDARY.md`
 - research evidence คือ `docs/RESEARCH_BRIEF.md`
 - APaint เป็น donor/reference consumer ไม่ใช่ dependency ของ A-Engine
 
@@ -18,7 +19,8 @@
 
 ก่อนสร้างหรือแก้ production code:
 
-1. อ่าน canonical architecture ทั้งไฟล์และ section ของ phase ปัจจุบัน
+1. อ่าน canonical architecture ทั้งไฟล์และ section ของ phase ปัจจุบัน; งาน APaint,
+   donor หรือ migration ต้องอ่าน `docs/AENGINE_APAINT_BOUNDARY.md` เพิ่ม
 2. ระบุ current phase, user outcome, owner/API, dependency direction, lifetime/state,
    invariants, exact files, tests และ stop line
 3. รักษา MIT license ของ repository และห้ามเดา platform/toolchain/ECS หรือ license
@@ -49,10 +51,15 @@
 
 ## Migration and donor rules
 
+- A-Engine เป็นเจ้าของ reusable mechanism/backend-neutral contract; APaint เป็นเจ้าของ
+  product UI, policy, presets, workspace และ `.apaint` project semantics
 - ห้าม copy APaint manager tree หรือ link APaint product targetเข้า `aengine_*`
 - ก่อนย้าย donor code ต้องมี provenance/license, current call-path, consumer inventory,
-  contract และ deletion condition
+  source owner, target owner/placement, contract, verification และ deletion condition
+- ถ้ายังแยก product policy ออกจาก mechanismไม่ได้ ให้คง codeไว้ใน APaint และทำ
+  characterization sliceก่อน ห้ามย้ายเพียงเพื่อจัด directoryให้ดูสะอาด
 - ย้ายทีละ route ผ่าน adapter; legacy/new route ต้องไม่อยู่คู่กันหลัง consumerเป็นศูนย์
+- ห้ามสร้าง duplicate active state/ownership ระหว่าง APaint กับ A-Engine
 - รักษางานผู้ใช้ใน dirty worktree และห้าม destructive actionนอก targetที่สั่งชัดเจน
 
 ## KnowMan

@@ -98,10 +98,17 @@ function New-AiModuleMap($ManifestFile, $ObservedTests, $CMakeModel) {
     $manifest = Get-Content $ManifestFile.FullName -Raw | ConvertFrom-Json
     $module = [string]$manifest.module
     $kind = [string]$manifest.kind
+    $owner = [string]$manifest.owner
     $responsibility = [string]$manifest.responsibility
-    if (-not $module -or -not $kind -or -not $responsibility) {
-        throw "MODULE.json requires module, kind, and responsibility: $($ManifestFile.FullName)"
+    if ([int]$manifest.schema_version -ne 2 -or -not $module -or -not $kind -or -not $owner -or -not $responsibility) {
+        throw "MODULE.json requires schema v2, module, kind, owner, and responsibility: $($ManifestFile.FullName)"
     }
+    foreach ($field in @("lifetime", "threading", "mutation_gateway", "invariants", "stop_line")) {
+        if ($null -eq $manifest.PSObject.Properties[$field]) {
+            throw "MODULE.json schema v2 requires '$field': $($ManifestFile.FullName)"
+        }
+    }
+
     $targetPattern = '(?i)(add_library|add_executable)\s*\(\s*' + [regex]::Escape($module) + '(\s|\))'
     if (-not [regex]::IsMatch($CMakeModel.text, $targetPattern)) {
         throw "Declared module has no CMake target: $module"
@@ -126,18 +133,24 @@ function New-AiModuleMap($ManifestFile, $ObservedTests, $CMakeModel) {
     }
 
     return [ordered]@{
-        schema_version = 1
+        schema_version = 2
         module = $module
         kind = $kind
+        owner = $owner
         responsibility = $responsibility
         manifest = Get-AiRepoRelativePath $ManifestFile.FullName
         declared = [ordered]@{
             allowed_dependencies = @($allowedDependencies)
             forbidden_dependencies = @($manifest.forbidden_dependencies)
             state_owners = @($manifest.state_owners)
+            lifetime = $manifest.lifetime
+            threading = $manifest.threading
+            mutation_gateway = @($manifest.mutation_gateway)
+            invariants = @($manifest.invariants)
             entry_points = @($manifest.entry_points)
             skills = @($manifest.skills)
             tests = @($manifest.tests)
+            stop_line = @($manifest.stop_line)
         }
         observed = [ordered]@{
             dependencies = @($actualDependencies)

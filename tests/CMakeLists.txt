@@ -51,6 +51,16 @@ set_tests_properties(aengine.architecture.agent_skills PROPERTIES
 )
 
 add_test(
+    NAME aengine.architecture.ai_code_map
+    COMMAND ${CMAKE_COMMAND}
+        -DAENGINE_SOURCE_DIR=${PROJECT_SOURCE_DIR}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/architecture/VerifyAiCodeMap.cmake
+)
+set_tests_properties(aengine.architecture.ai_code_map PROPERTIES
+    LABELS "architecture;ai-code-map;foundation"
+)
+
+add_test(
     NAME aengine.info
     COMMAND aengine_info
 )

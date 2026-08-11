@@ -78,13 +78,13 @@ function Get-AiPublicSymbols($Headers) {
     foreach ($header in $Headers) {
         $text = Get-Content $header.FullName -Raw
         $relative = Get-AiRepoRelativePath $header.FullName
-        foreach ($match in [regex]::Matches($text, '(?m)^\s*(?:class|struct)\s+(?:\[\[[^\]]+\]\]\s*)?([A-Za-z_]\w*)')) {
+        foreach ($match in [regex]::Matches($text, '(?m)^(?:class|struct)\s+(?:\[\[[^\]]+\]\]\s*)?([A-Za-z_]\w*)')) {
             $symbols += [pscustomobject][ordered]@{ name = $match.Groups[1].Value; kind = "type"; header = $relative }
         }
-        foreach ($match in [regex]::Matches($text, '(?m)^\s*enum\s+class\s+([A-Za-z_]\w*)')) {
+        foreach ($match in [regex]::Matches($text, '(?m)^enum\s+class\s+([A-Za-z_]\w*)')) {
             $symbols += [pscustomobject][ordered]@{ name = $match.Groups[1].Value; kind = "enum"; header = $relative }
         }
-        foreach ($match in [regex]::Matches($text, '(?m)^\s*using\s+([A-Za-z_]\w*)\s*=')) {
+        foreach ($match in [regex]::Matches($text, '(?m)^using\s+([A-Za-z_]\w*)\s*=')) {
             $symbols += [pscustomobject][ordered]@{ name = $match.Groups[1].Value; kind = "alias"; header = $relative }
         }
         foreach ($match in [regex]::Matches($text, '(?m)^\[\[[^\]]+\]\]\s+[^;\r\n]+?\s+([A-Za-z_]\w*)\s*\([^;{]*\)\s*(?:noexcept)?\s*;')) {

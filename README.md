@@ -6,7 +6,7 @@ diagnostics และ tooling ให้คนกับ AI พัฒนาต่�
 
 ## สถานะ
 
-**Phase 0: docs-first / ยังไม่มี production source**
+**Phase 1: foundation slice complete**
 
 License: [MIT](LICENSE)
 
@@ -19,6 +19,7 @@ Recycle Bin การเริ่มใหม่ครั้งนี้ไม�
 - [A-Engine API Architecture](docs/AENGINE_API_ARCHITECTURE.md)
 - [A-Engine / APaint Ownership Boundary](docs/AENGINE_APAINT_BOUNDARY.md)
 - [Research Brief](docs/RESEARCH_BRIEF.md)
+- [Phase 0 Approval Package](docs/PHASE_0_APPROVAL.md) — ข้อเสนอที่ต้องอนุมัติก่อนสร้าง production code
 
 ## Developer experience เป้าหมาย
 
@@ -67,6 +68,19 @@ global singleton, Vulkan handle หรือ privileged path
 5. Phase 4 — renderer, shader library, Vulkan backend และ `View3D`
 6. Phase 5+ — workflows/editor/add-ons แล้วจึงทยอยย้าย APaint และ feature packs
 
-ยังไม่สร้าง CMake/source scaffold จนกว่า Phase 0 decisions ที่เหลือจะได้รับการอนุมัติ
-เพราะ scaffold ที่ไม่มี approved compiler/platform/build policy จะกลายเป็นหนี้ตั้งแต่
-วันแรก
+Phase 0 approval ถูกบันทึกใน [Phase 0 Approval Package](docs/PHASE_0_APPROVAL.md)
+และ Phase 1 เริ่มจาก foundation แบบ dependency-free ก่อนเพิ่ม platform, renderer หรือ
+product scaffold.
+
+## Build และ test (Phase 1)
+
+เปิด Visual Studio x64 developer PowerShell แล้วรัน:
+
+```powershell
+cmake --preset windows-x64-debug
+cmake --build --preset windows-x64-debug --parallel
+ctest --preset windows-x64-debug
+```
+
+consumer แรกคือ `aengine_info` ซึ่งอ่าน version/capabilities ผ่าน public header
+เท่านั้น และ Phase 1 ไม่มี dependency นอก C++ standard library.

@@ -15,6 +15,7 @@
     "aengine.architecture.guard",
     "aengine.architecture.source_shape",
     "aengine.architecture.agent_skills",
+    "aengine.architecture.ai_code_map",
     "aengine.info"
   ],
   "allowed_dependencies": [],

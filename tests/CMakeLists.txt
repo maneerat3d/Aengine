@@ -24,6 +24,7 @@ add_library(aengine_header_self_containment OBJECT
     headers/JobHeader.cpp
     headers/OperationHeader.cpp
     headers/ResultHeader.cpp
+    headers/TimeHeader.cpp
     headers/VersionHeader.cpp
     headers/FoundationHeader.cpp
 )

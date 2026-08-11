@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "current_phase": "Phase 1 complete; Phase 2 Application/Platform facade is next",
+  "current_phase": "Phase 2A Application lifecycle slice; Phase 2B platform ports next",
   "canonical_build_entrypoint": "build.bat",
   "module_manifest_name": "MODULE.json",
   "generated_root": ".agent/code-map/current",

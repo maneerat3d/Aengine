@@ -40,7 +40,7 @@ function Get-AiDirectoryFingerprint([string]$Root) {
     Get-ChildItem $Root -Recurse -File | Sort-Object FullName | ForEach-Object {
         $relative = $_.FullName.Substring($prefix.Length).TrimStart('\').Replace('\', '/')
         $hash = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
-        $parts += "$relative:$hash"
+        $parts += ("{0}:{1}" -f $relative, $hash)
     }
     return Get-AiTextSha256 ($parts -join "`n")
 }
@@ -62,7 +62,7 @@ function Get-AiInputFingerprint {
     $parts = @()
     foreach ($file in ($files | Sort-Object FullName -Unique)) {
         $hash = (Get-FileHash $file.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
-        $parts += "$(Get-AiRepoRelativePath $file.FullName):$hash"
+        $parts += ("{0}:{1}" -f (Get-AiRepoRelativePath $file.FullName), $hash)
     }
     return Get-AiTextSha256 ($parts -join "`n")
 }

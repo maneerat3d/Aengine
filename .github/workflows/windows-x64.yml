@@ -3,10 +3,12 @@ name: windows-x64
 on:
   push:
   pull_request:
+  workflow_dispatch:
 
 jobs:
   foundation:
-    runs-on: windows-2022
+    runs-on: [self-hosted, windows, x64]
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - name: Configure, build, and test

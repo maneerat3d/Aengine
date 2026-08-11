@@ -19,6 +19,7 @@ add_library(aengine_header_self_containment OBJECT
     headers/ApplicationTraceHeader.cpp
     headers/DiagnosticsHeader.cpp
     headers/ErrorHeader.cpp
+    headers/FoundationTimeHeader.cpp
     headers/HandleHeader.cpp
     headers/HandlePoolHeader.cpp
     headers/JobHeader.cpp

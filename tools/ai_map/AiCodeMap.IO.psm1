@@ -30,7 +30,7 @@ function Write-AiUtf8([string]$Path, [string]$Content) {
 }
 
 function Write-AiStableJson([string]$Path, $Object) {
-    Write-AiUtf8 $Path (($Object | ConvertTo-Json -Depth 16) + "`n")
+    Write-AiUtf8 $Path (($Object | ConvertTo-Json -Depth 16 -Compress) + "`n")
 }
 
 function Get-AiDirectoryFingerprint([string]$Root) {

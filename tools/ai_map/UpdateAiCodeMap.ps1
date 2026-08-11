@@ -47,15 +47,19 @@ $indexModules = @($moduleMaps | ForEach-Object {
     [ordered]@{
         module = $_.module
         kind = $_.kind
+        owner = $_.owner
         responsibility = $_.responsibility
         map = "modules/$($_.module).json"
         dependencies = @($_.observed.dependencies)
+        lifetime_scope = [string]$_.declared.lifetime.scope
+        thread_affinity = [string]$_.declared.threading.affinity
+        invariants = @($_.declared.invariants | ForEach-Object { [string]$_.id })
         tests = @($_.declared.tests)
         skills = @($_.declared.skills)
     }
 })
 Write-AiStableJson (Join-Path $generatedRoot "INDEX.json") ([ordered]@{
-    schema_version = 1
+    schema_version = 2
     current_phase = [string]$config.current_phase
     build_entrypoint = [string]$config.canonical_build_entrypoint
     modules = $indexModules
@@ -72,10 +76,16 @@ foreach ($rule in @($config.rules)) { $context += "- $rule" }
 $context += @("", "## Modules")
 foreach ($map in $moduleMaps) {
     $deps = if (@($map.observed.dependencies).Count) { @($map.observed.dependencies) -join ", " } else { "none" }
+    $invariantIds = @($map.declared.invariants | ForEach-Object { [string]$_.id }) -join ", "
     $context += @(
         "", "### $($map.module)", "$($map.responsibility)", "",
+        "- Owner: $($map.owner)",
         "- Map: modules/$($map.module).json",
         "- Dependencies: $deps",
+        "- Lifetime: $($map.declared.lifetime.scope)",
+        "- Threading: $($map.declared.threading.affinity)",
+        "- Mutation gateway: $(@($map.declared.mutation_gateway) -join ', ')",
+        "- Invariants: $invariantIds",
         "- Tests: $(@($map.declared.tests) -join ', ')",
         "- Skills: $(@($map.declared.skills) -join ', ')",
         "- Entry points: $(@($map.declared.entry_points) -join ', ')"

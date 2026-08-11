@@ -1,7 +1,8 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "module": "aengine_platform",
   "kind": "library",
+  "owner": "AEngine/Platform",
   "responsibility": "Application lifecycle facade, headless frame pumping, lifecycle state ownership, deterministic application trace, and application composition wiring.",
   "public_api": [
     "sdk/include/AEngine/Application.h",
@@ -15,6 +16,10 @@
     "aengine.architecture.guard",
     "aengine.architecture.source_shape",
     "aengine.architecture.ai_code_map",
+    "aengine.architecture.module_contract",
+    "aengine.architecture.dependency_cycle",
+    "aengine.architecture.public_api_ownership",
+    "aengine.architecture.oop_policy",
     "aengine.headless"
   ],
   "allowed_dependencies": [
@@ -31,6 +36,42 @@
     "ApplicationLifecycle",
     "ApplicationTraceBuffer"
   ],
+  "lifetime": {
+    "scope": "one App instance",
+    "creation": "App::Init creates ApplicationRuntime through the explicit composition root",
+    "shutdown": "Quit is a request; Stopped is reached at a frame boundary or explicit runtime shutdown, then RAII destroys the runtime"
+  },
+  "threading": {
+    "affinity": "application owner thread",
+    "concurrency": "Run owns the loop while active; PumpFrame is rejected during Run and no concurrent mutation route is provided"
+  },
+  "mutation_gateway": [
+    "App::PumpFrame",
+    "App::Run",
+    "App::Quit"
+  ],
+  "invariants": [
+    {
+      "id": "APP-001",
+      "text": "App initializes without SDL, Vulkan, ImGui, APaint, scene, or game dependencies.",
+      "test": "aengine.architecture.guard"
+    },
+    {
+      "id": "APP-002",
+      "text": "Quit is a request and becomes Stopped only at the canonical safe frame boundary.",
+      "test": "aengine.platform.contract"
+    },
+    {
+      "id": "APP-003",
+      "text": "PumpFrame cannot execute while Run owns the application loop.",
+      "test": "aengine.platform.contract"
+    },
+    {
+      "id": "APP-004",
+      "text": "Headless manual pumping produces deterministic frame and lifecycle trace ordering through the public SDK.",
+      "test": "aengine.headless"
+    }
+  ],
   "entry_points": [
     "App::Init",
     "App::Run",
@@ -39,7 +80,14 @@
   ],
   "skills": [
     "software-architecture",
+    "cpp-oop-design",
     "cpp-api-contracts",
     "validation-evidence"
+  ],
+  "stop_line": [
+    "window/input/time/filesystem ports",
+    "ApplicationServices injection",
+    "SDL/Vulkan/ImGui adapters",
+    "scene/game/editor/domain behavior"
   ]
 }

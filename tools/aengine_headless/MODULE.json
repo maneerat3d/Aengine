@@ -1,7 +1,8 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "module": "aengine_headless",
   "kind": "tool",
+  "owner": "AEngine/Tooling",
   "responsibility": "Headless public-SDK consumer that proves deterministic manual frame pumping, quit, and safe-boundary stop semantics.",
   "public_api": [],
   "implementation": [
@@ -20,11 +21,40 @@
     "APaint"
   ],
   "state_owners": [],
+  "lifetime": {
+    "scope": "process-owned App consumer",
+    "creation": "main calls App::Init through the public SDK",
+    "shutdown": "main requests Quit, pumps the safe boundary, then App RAII destruction ends before process exit"
+  },
+  "threading": {
+    "affinity": "main application thread",
+    "concurrency": "single-threaded deterministic manual-loop consumer"
+  },
+  "mutation_gateway": [
+    "aengine::App public API"
+  ],
+  "invariants": [
+    {
+      "id": "HDL-001",
+      "text": "The headless consumer reaches stopped state after exactly three pumped frames followed by a quit safe-boundary pump.",
+      "test": "aengine.headless"
+    },
+    {
+      "id": "HDL-002",
+      "text": "The headless consumer accesses application lifecycle only through public A-Engine SDK headers.",
+      "test": "aengine.headless"
+    }
+  ],
   "entry_points": [
     "main"
   ],
   "skills": [
     "cpp-api-contracts",
     "validation-evidence"
+  ],
+  "stop_line": [
+    "window/native input",
+    "SDL/Vulkan/ImGui backend access",
+    "scene/game/editor behavior"
   ]
 }

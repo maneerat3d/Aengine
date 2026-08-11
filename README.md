@@ -6,7 +6,7 @@ diagnostics และ tooling ให้คนกับ AI พัฒนาต่�
 
 ## สถานะ
 
-**Phase 1: foundation slice complete**
+**Phase 2A: dependency-free headless application lifecycle slice**
 
 License: [MIT](LICENSE)
 
@@ -25,29 +25,38 @@ Recycle Bin การเริ่มใหม่ครั้งนี้ไม�
 - [Research Brief](docs/RESEARCH_BRIEF.md)
 - [Phase 0 Approval Package](docs/PHASE_0_APPROVAL.md)
 
-## Developer experience เป้าหมาย
+## Phase 2A developer experience
 
 ```cpp
-#include <AEngine/App.h>
+#include <AEngine/Application.h>
+
+#include <utility>
 
 int main() {
+    constexpr char kName[] = "My3DApp";
     auto appResult = aengine::App::Init({
-        .name = "My3DApp",
+        .name = aengine::Utf8View{kName, sizeof(kName) - 1},
     });
     if (!appResult) {
-        return appResult.Error().ExitCode();
+        return 1;
     }
 
-    auto app = std::move(appResult.Value());
-    auto view3D = app.CreateView3D();
-    view3D.Update();
-    return app.Run();
+    auto app = std::move(appResult).Value();
+    auto frame = app.PumpFrame();
+    if (!frame) {
+        return 2;
+    }
+
+    app.Quit();
+    auto stopped = app.PumpFrame();
+    return stopped && !stopped.Value() ? 0 : 3;
 }
 ```
 
-API ด้านบนเป็น target contract ยังไม่ใช่ API ที่ build ได้ใน repository ปัจจุบัน
-ความเรียบง่ายของ façade ต้องลง execution path เดียวกับ low-level API และห้ามซ่อน
-global singleton, Vulkan handle หรือ privileged path
+Phase 2A implement `App::Init`, `Run`, `PumpFrame`, `Quit`, lifecycle state และ deterministic
+application trace โดยยังไม่เพิ่ม SDL, Vulkan, ImGui หรือ APaint dependency. Window/input/time/
+filesystem ports และ `ApplicationServices` injection เป็น stop line ของ Phase 2B เพื่อไม่
+scaffold API ก่อนมี consumer จริง
 
 ## หลักการ
 
@@ -70,14 +79,14 @@ global singleton, Vulkan handle หรือ privileged path
 
 1. Phase 0 — MIT/third-party policy, platform/toolchain, dependency rules และ project policy
 2. Phase 1 — foundation, typed handles, errors/results, jobs และ diagnostics
-3. Phase 2 — `App::Init`, `Run`, `PumpFrame`, `Quit` และ headless lifecycle
+3. Phase 2 — `App::Init`, `Run`, `PumpFrame`, `Quit` และ platform ports
 4. Phase 3 — world, scene, asset และ glTF viewer slice
 5. Phase 4 — renderer, shader library, Vulkan backend และ `View3D`
 6. Phase 5+ — High-level UI/workflows/editor/add-ons แล้วจึงทยอยย้าย APaint และ feature packs
 
 Phase 0 approval ถูกบันทึกใน [Phase 0 Approval Package](docs/PHASE_0_APPROVAL.md)
-และ Phase 1 เริ่มจาก foundation แบบ dependency-free ก่อนเพิ่ม platform, renderer หรือ
-product scaffold.
+Phase 1 foundation ผ่านแล้ว และ Phase 2 ถูกแบ่งเป็น vertical slices เพื่อรักษา ownership
+และ validation ที่ตรวจได้ง่าย
 
 ## Build และ test
 
@@ -120,5 +129,5 @@ AI ควรเริ่มจาก:
 6. public contract + focused tests
 7. implementation เฉพาะ route ที่ต้องแก้
 
-consumer แรกคือ `aengine_info` ซึ่งอ่าน version/capabilities ผ่าน public header เท่านั้น
-และ Phase 1 ไม่มี dependency นอก C++ standard library.
+Phase 2A มี consumer `aengine_headless` ซึ่งใช้ public Application SDK เท่านั้น และ
+`aengine_info` ยังคงเป็น consumer ของ foundation build identity/capabilities โดยแยกหน้าที่กันค่ะ

@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "current_phase": "Phase 2A complete; architecture/OOP safety baseline before Phase 2B platform ports",
+  "current_phase": "Phase 2B Platform Ports active",
   "canonical_build_entrypoint": "build.bat",
   "module_manifest_name": "MODULE.json",
   "generated_root": ".agent/code-map/current",

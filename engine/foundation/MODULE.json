@@ -3,7 +3,7 @@
   "module": "aengine_foundation",
   "kind": "library",
   "owner": "AEngine/Foundation",
-  "responsibility": "Core IDs, handles, structured results/errors, diagnostics, API version/capabilities, and build identity.",
+  "responsibility": "Core IDs, handles, structured results/errors, diagnostics, API version/capabilities, build identity, and backend-neutral time metadata values.",
   "public_api": [
     "sdk/include/AEngine/Foundation.h",
     "sdk/include/AEngine/Foundation"
@@ -43,7 +43,7 @@
   },
   "threading": {
     "affinity": "no module-wide thread affinity",
-    "concurrency": "OperationId generation is thread-safe; mutable instance owners require their documented caller synchronization"
+    "concurrency": "OperationId generation is thread-safe; immutable/value contracts are caller-owned; mutable instance owners require their documented caller synchronization"
   },
   "mutation_gateway": [
     "DiagnosticLog::Record",
@@ -70,6 +70,11 @@
       "id": "FND-004",
       "text": "DiagnosticLog is instance-owned, bounded, and discards the oldest breadcrumb at capacity.",
       "test": "aengine.foundation.contract"
+    },
+    {
+      "id": "FND-005",
+      "text": "Monotonic time metadata is a trivially copyable fixed-width foundation value with no platform or backend dependency.",
+      "test": "aengine.foundation.contract"
     }
   ],
   "entry_points": [
@@ -85,7 +90,7 @@
     "validation-evidence"
   ],
   "stop_line": [
-    "application/platform lifecycle",
+    "application/platform lifecycle or time-source ownership",
     "renderer/GPU/backend ownership",
     "scene/game/editor/product behavior"
   ]

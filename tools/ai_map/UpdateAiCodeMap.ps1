@@ -37,7 +37,7 @@ if ($Mode -eq "Update" -and (Test-Path $statePath) -and (Test-Path (Join-Path $c
 
 if (Test-Path $generatedRoot) { Remove-Item $generatedRoot -Recurse -Force }
 [IO.Directory]::CreateDirectory((Join-Path $generatedRoot "modules")) | Out-Null
-$moduleMaps = Get-AiModuleMaps
+$moduleMaps = @(Get-AiModuleMaps)
 
 foreach ($map in $moduleMaps) {
     Write-AiStableJson (Join-Path $generatedRoot "modules\$($map.module).json") $map
@@ -49,9 +49,9 @@ $indexModules = @($moduleMaps | ForEach-Object {
         kind = $_.kind
         responsibility = $_.responsibility
         map = "modules/$($_.module).json"
-        dependencies = $_.observed.dependencies
-        tests = $_.declared.tests
-        skills = $_.declared.skills
+        dependencies = @($_.observed.dependencies)
+        tests = @($_.declared.tests)
+        skills = @($_.declared.skills)
     }
 })
 Write-AiStableJson (Join-Path $generatedRoot "INDEX.json") ([ordered]@{

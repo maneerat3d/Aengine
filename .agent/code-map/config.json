@@ -1,14 +1,15 @@
 {
-  "schema_version": 1,
-  "current_phase": "Phase 2A Application lifecycle slice; Phase 2B platform ports next",
+  "schema_version": 2,
+  "current_phase": "Phase 2A complete; architecture/OOP safety baseline before Phase 2B platform ports",
   "canonical_build_entrypoint": "build.bat",
   "module_manifest_name": "MODULE.json",
   "generated_root": ".agent/code-map/current",
   "rules": [
     "Read AGENTS.md first",
+    "Read docs/ARCHITECTURE_SAFETY_BASELINE.md before production architecture or class ownership changes",
     "Use build.bat as the only normal build/test entrypoint",
     "Read INDEX.json before opening implementation files",
     "Load only the module map and skills relevant to the task",
-    "Treat MODULE.json as declared intent and source/CMake/tests as observed reality"
+    "Treat MODULE.json v2 as declared owner/lifetime/threading/invariant intent and source/CMake/tests as observed reality"
   ]
 }

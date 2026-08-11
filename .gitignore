@@ -1,0 +1,27 @@
+# Build outputs
+/build/
+/out/
+/install/
+/dist/
+
+# CMake generated files
+CMakeCache.txt
+CMakeFiles/
+cmake-build-*/
+
+# IDE and editor state
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+
+# Runtime and diagnostics
+logs/
+captures/
+crashdumps/
+*.dmp
+
+# Platform noise
+Thumbs.db
+.DS_Store

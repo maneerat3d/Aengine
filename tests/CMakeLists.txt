@@ -11,6 +11,7 @@ add_library(aengine_header_self_containment OBJECT
     headers/HandleHeader.cpp
     headers/HandlePoolHeader.cpp
     headers/JobHeader.cpp
+    headers/OperationHeader.cpp
     headers/ResultHeader.cpp
     headers/VersionHeader.cpp
     headers/FoundationHeader.cpp
@@ -28,6 +29,16 @@ add_test(
         -P ${CMAKE_CURRENT_SOURCE_DIR}/architecture/VerifyArchitecture.cmake
 )
 set_tests_properties(aengine.architecture.guard PROPERTIES LABELS "architecture;foundation")
+
+add_test(
+    NAME aengine.architecture.source_shape
+    COMMAND ${CMAKE_COMMAND}
+        -DAENGINE_SOURCE_DIR=${PROJECT_SOURCE_DIR}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/architecture/VerifySourceShape.cmake
+)
+set_tests_properties(aengine.architecture.source_shape PROPERTIES
+    LABELS "architecture;source-shape;foundation"
+)
 
 add_test(
     NAME aengine.info

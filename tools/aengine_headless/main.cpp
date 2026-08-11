@@ -66,7 +66,6 @@ int main() {
               << " state=" << StateName(app.State())
               << " trace=" << trace.size
               << " truncated=" << (trace.truncated ? 1 : 0)
-              << " time_ns=" << endTime.nanoseconds
               << '\n';
     return 0;
 }

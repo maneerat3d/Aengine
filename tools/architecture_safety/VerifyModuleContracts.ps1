@@ -93,8 +93,17 @@ foreach ($file in ($manifestFiles | Sort-Object FullName)) {
         if ($test -notin $knownTests) { Add-Error "$module declares missing CTest '$test'" }
     }
 
-    if ([string]$manifest.kind -eq "library" -and "cpp-oop-design" -notin @($manifest.skills)) {
-        Add-Error "$module library must route class/ownership work through cpp-oop-design"
+    $skills = @($manifest.skills | ForEach-Object { [string]$_ })
+    if ("validation-evidence" -notin $skills) {
+        Add-Error "$module must route completion through validation-evidence"
+    }
+    if ([string]$manifest.kind -eq "library") {
+        foreach ($requiredSkill in @("software-architecture", "cpp-oop-design")) {
+            if ($requiredSkill -notin $skills) { Add-Error "$module library must route through $requiredSkill" }
+        }
+    }
+    if (@($manifest.public_api).Count -gt 0 -and "cpp-api-contracts" -notin $skills) {
+        Add-Error "$module owns public API but does not route through cpp-api-contracts"
     }
 
     foreach ($dependency in @($manifest.allowed_dependencies)) {

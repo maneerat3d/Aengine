@@ -6,6 +6,7 @@ endif()
 
 set(required_skills
     software-architecture
+    cpp-oop-design
     cpp-api-contracts
     validation-evidence
     third-party-governance

@@ -38,7 +38,7 @@ public:
         return std::move(std::get<0>(value_));
     }
 
-    [[nodiscard]] const Error& Error() const& {
+    [[nodiscard]] const aengine::Error& Error() const& {
         assert(!HasValue());
         return std::get<1>(value_);
     }

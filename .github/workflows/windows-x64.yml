@@ -2,6 +2,7 @@ name: windows-x64
 
 on:
   push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
 
@@ -15,23 +16,6 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - name: Configure, build, and test
+      - name: Canonical build and test
         shell: cmd
-        run: |
-          set "AENGINE_VS2022="
-          for /f "usebackq tokens=*" %%i in (`"%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -version [17.0^,18.0^) -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do set "AENGINE_VS2022=%%i"
-          if not defined AENGINE_VS2022 exit /b 1
-          call "%AENGINE_VS2022%\VC\Auxiliary\Build\vcvarsall.bat" x64 10.0.26100.0 -vcvars_ver=14.44
-          if errorlevel 1 exit /b %errorlevel%
-          cmake --preset windows-x64-debug
-          if errorlevel 1 exit /b %errorlevel%
-          cmake --build --preset windows-x64-debug --parallel
-          if errorlevel 1 exit /b %errorlevel%
-          ctest --preset windows-x64-debug
-          if errorlevel 1 exit /b %errorlevel%
-          cmake --preset windows-x64-release
-          if errorlevel 1 exit /b %errorlevel%
-          cmake --build --preset windows-x64-release --parallel
-          if errorlevel 1 exit /b %errorlevel%
-          ctest --preset windows-x64-release
-          if errorlevel 1 exit /b %errorlevel%
+        run: call build.bat

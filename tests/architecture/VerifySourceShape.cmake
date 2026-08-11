@@ -19,6 +19,19 @@ function(aengine_check_source_shape file_path max_lines scope_name)
     endif()
 endfunction()
 
+function(aengine_check_file_size file_path max_bytes scope_name)
+    if(NOT EXISTS "${file_path}")
+        return()
+    endif()
+
+    file(SIZE "${file_path}" file_size)
+    if(file_size GREATER max_bytes)
+        file(RELATIVE_PATH relative_path "${AENGINE_SOURCE_DIR}" "${file_path}")
+        message(FATAL_ERROR
+            "${scope_name} exceeds size budget: ${relative_path} has ${file_size} bytes; max is ${max_bytes}. Split or shard the generated navigation data.")
+    endif()
+endfunction()
+
 file(GLOB_RECURSE public_headers LIST_DIRECTORIES false
     "${AENGINE_SOURCE_DIR}/sdk/include/AEngine/*.h")
 foreach(file_path IN LISTS public_headers)
@@ -39,6 +52,21 @@ foreach(file_path IN LISTS tool_sources)
     aengine_check_source_shape("${file_path}" 240 "tool source")
 endforeach()
 
+file(GLOB_RECURSE automation_scripts LIST_DIRECTORIES false
+    "${AENGINE_SOURCE_DIR}/tools/*.ps1"
+    "${AENGINE_SOURCE_DIR}/tools/*.psm1")
+foreach(file_path IN LISTS automation_scripts)
+    aengine_check_source_shape("${file_path}" 260 "automation script")
+endforeach()
+aengine_check_source_shape("${AENGINE_SOURCE_DIR}/build.bat" 220 "canonical build script")
+
+file(GLOB_RECURSE module_manifests LIST_DIRECTORIES false
+    "${AENGINE_SOURCE_DIR}/engine/*/MODULE.json"
+    "${AENGINE_SOURCE_DIR}/tools/*/MODULE.json")
+foreach(file_path IN LISTS module_manifests)
+    aengine_check_source_shape("${file_path}" 120 "module manifest")
+endforeach()
+
 file(GLOB_RECURSE test_sources LIST_DIRECTORIES false
     "${AENGINE_SOURCE_DIR}/tests/*.h"
     "${AENGINE_SOURCE_DIR}/tests/*.cpp")
@@ -55,4 +83,13 @@ list(APPEND module_cmake_files
     "${AENGINE_SOURCE_DIR}/tests/CMakeLists.txt")
 foreach(file_path IN LISTS module_cmake_files)
     aengine_check_source_shape("${file_path}" 300 "build/architecture script")
+endforeach()
+
+set(ai_map_root "${AENGINE_SOURCE_DIR}/.agent/code-map/current")
+aengine_check_source_shape("${ai_map_root}/AI_CONTEXT.md" 200 "AI context index")
+aengine_check_file_size("${ai_map_root}/AI_CONTEXT.md" 16384 "AI context index")
+aengine_check_file_size("${ai_map_root}/INDEX.json" 16384 "AI module index")
+file(GLOB ai_module_maps LIST_DIRECTORIES false "${ai_map_root}/modules/*.json")
+foreach(file_path IN LISTS ai_module_maps)
+    aengine_check_file_size("${file_path}" 32768 "AI module map")
 endforeach()

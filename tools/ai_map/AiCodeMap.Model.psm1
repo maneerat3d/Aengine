@@ -79,16 +79,16 @@ function Get-AiPublicSymbols($Headers) {
         $text = Get-Content $header.FullName -Raw
         $relative = Get-AiRepoRelativePath $header.FullName
         foreach ($match in [regex]::Matches($text, '(?m)^\s*(?:class|struct)\s+(?:\[\[[^\]]+\]\]\s*)?([A-Za-z_]\w*)')) {
-            $symbols += [ordered]@{ name = $match.Groups[1].Value; kind = "type"; header = $relative }
+            $symbols += [pscustomobject][ordered]@{ name = $match.Groups[1].Value; kind = "type"; header = $relative }
         }
         foreach ($match in [regex]::Matches($text, '(?m)^\s*enum\s+class\s+([A-Za-z_]\w*)')) {
-            $symbols += [ordered]@{ name = $match.Groups[1].Value; kind = "enum"; header = $relative }
+            $symbols += [pscustomobject][ordered]@{ name = $match.Groups[1].Value; kind = "enum"; header = $relative }
         }
         foreach ($match in [regex]::Matches($text, '(?m)^\s*using\s+([A-Za-z_]\w*)\s*=')) {
-            $symbols += [ordered]@{ name = $match.Groups[1].Value; kind = "alias"; header = $relative }
+            $symbols += [pscustomobject][ordered]@{ name = $match.Groups[1].Value; kind = "alias"; header = $relative }
         }
-        foreach ($match in [regex]::Matches($text, '(?m)^\s*(?:\[\[[^\]]+\]\]\s*)?[A-Za-z_][\w:<>,*&\s]+\s+([A-Za-z_]\w*)\s*\([^;{}]*\)\s*(?:noexcept)?\s*;')) {
-            $symbols += [ordered]@{ name = $match.Groups[1].Value; kind = "function"; header = $relative }
+        foreach ($match in [regex]::Matches($text, '(?m)^\[\[[^\]]+\]\]\s+[^;\r\n]+?\s+([A-Za-z_]\w*)\s*\([^;{]*\)\s*(?:noexcept)?\s*;')) {
+            $symbols += [pscustomobject][ordered]@{ name = $match.Groups[1].Value; kind = "function"; header = $relative }
         }
     }
     return @($symbols | Sort-Object name, kind, header -Unique)
@@ -109,7 +109,7 @@ function New-AiModuleMap($ManifestFile, $ObservedTests, $CMakeModel) {
 
     $publicHeaders = Expand-AiDeclaredPaths $manifest.public_api @(".h", ".hpp")
     $implementationFiles = Expand-AiDeclaredPaths $manifest.implementation @(".h", ".hpp", ".cpp", ".c", ".cc", ".cxx")
-    $actualDependencies = Get-AiTargetDependencies $module $CMakeModel
+    $actualDependencies = @(Get-AiTargetDependencies $module $CMakeModel)
     $allowedDependencies = @($manifest.allowed_dependencies | ForEach-Object { [string]$_ } | Sort-Object -Unique)
     foreach ($dependency in $actualDependencies) {
         if ($dependency -notin $allowedDependencies) {
@@ -132,7 +132,7 @@ function New-AiModuleMap($ManifestFile, $ObservedTests, $CMakeModel) {
         responsibility = $responsibility
         manifest = Get-AiRepoRelativePath $ManifestFile.FullName
         declared = [ordered]@{
-            allowed_dependencies = $allowedDependencies
+            allowed_dependencies = @($allowedDependencies)
             forbidden_dependencies = @($manifest.forbidden_dependencies)
             state_owners = @($manifest.state_owners)
             entry_points = @($manifest.entry_points)
@@ -140,16 +140,16 @@ function New-AiModuleMap($ManifestFile, $ObservedTests, $CMakeModel) {
             tests = @($manifest.tests)
         }
         observed = [ordered]@{
-            dependencies = $actualDependencies
+            dependencies = @($actualDependencies)
             public_headers = @($publicHeaders | ForEach-Object { Get-AiRepoRelativePath $_.FullName })
             implementation_files = @($implementationFiles | ForEach-Object { Get-AiRepoRelativePath $_.FullName })
-            public_symbols = Get-AiPublicSymbols $publicHeaders
+            public_symbols = @(Get-AiPublicSymbols $publicHeaders)
         }
     }
 }
 
 function Get-AiModuleMaps {
-    $observedTests = Get-AiObservedTests
+    $observedTests = @(Get-AiObservedTests)
     $cmakeModel = Get-AiCMakeModel
     $roots = @()
     foreach ($name in @("engine", "tools")) {

@@ -6,5 +6,6 @@
 #include <AEngine/Foundation/Handle.h>
 #include <AEngine/Foundation/HandlePool.h>
 #include <AEngine/Foundation/Job.h>
+#include <AEngine/Foundation/Operation.h>
 #include <AEngine/Foundation/Result.h>
 #include <AEngine/Foundation/Version.h>

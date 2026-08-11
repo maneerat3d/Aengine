@@ -8,4 +8,5 @@
 #include <AEngine/Foundation/Job.h>
 #include <AEngine/Foundation/Operation.h>
 #include <AEngine/Foundation/Result.h>
+#include <AEngine/Foundation/Time.h>
 #include <AEngine/Foundation/Version.h>

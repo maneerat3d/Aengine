@@ -8,6 +8,8 @@ diagnostics และ tooling ให้คนกับ AI พัฒนาต่�
 
 **Phase 0: docs-first / ยังไม่มี production source**
 
+License: [MIT](LICENSE)
+
 Repository นี้ถูกสร้างใหม่เมื่อ 2026-08-11 หลังนำ prototype เดิมออกไปไว้ใน Windows
 Recycle Bin การเริ่มใหม่ครั้งนี้ไม่ใช่การ copy APaint หรือ engine เดิมทั้งก้อน แต่เป็นการ
 กำหนด contract ก่อน แล้วค่อยสร้าง vertical slice ที่มี consumer และ test จริง
@@ -55,12 +57,13 @@ global singleton, Vulkan handle หรือ privileged path
 
 ## ลำดับสร้าง
 
-1. Phase 0 — license, platform/toolchain, dependency rules และ project policy
+1. Phase 0 — MIT/third-party policy, platform/toolchain, dependency rules และ project policy
 2. Phase 1 — foundation, typed handles, errors/results, jobs และ diagnostics
 3. Phase 2 — `App::Init`, `Run`, `PumpFrame`, `Quit` และ headless lifecycle
 4. Phase 3 — world, scene, asset และ glTF viewer slice
 5. Phase 4 — renderer, shader library, Vulkan backend และ `View3D`
 6. Phase 5+ — workflows/editor/add-ons แล้วจึงทยอยย้าย APaint และ feature packs
 
-ยังไม่สร้าง CMake/source scaffold จนกว่า Phase 0 decisions จะได้รับการอนุมัติ เพราะ
-scaffold ที่ไม่มี approved compiler/platform/license จะกลายเป็นหนี้ตั้งแต่วันแรก
+ยังไม่สร้าง CMake/source scaffold จนกว่า Phase 0 decisions ที่เหลือจะได้รับการอนุมัติ
+เพราะ scaffold ที่ไม่มี approved compiler/platform/build policy จะกลายเป็นหนี้ตั้งแต่
+วันแรก

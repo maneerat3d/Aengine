@@ -89,10 +89,10 @@ ImGui, SDL, volk, Vulkan Memory Allocator, AppMan, RenderMan, UI-related depende
 
 ### 1.4 Open-source and AI-first mission
 
-A-Engine core, public SDK, shader library, build/test tools และ reference applications
-ต้องพัฒนาในรูปแบบ open source โดยแยก third-party dependency/licenseอย่างตรวจสอบได้
-license ที่แน่นอนต้องตัดสินใน Phase 0 พร้อม legal/dependency audit; ห้ามประกาศ
-compatibility จากความจำ
+A-Engine source repository ใช้ **MIT License** ตาม `LICENSE` ซึ่งอยู่ใน initial remote
+commit `f04f069` ส่วน third-party dependency, donor code, asset และ generated artifact
+ทุกชิ้นยังต้องมี provenance/license ledger และ compatibility audit แยก ห้ามถือว่า MIT
+ของ repositoryทำให้ donor codeนำเข้าได้อัตโนมัติ
 
 AI-first หมายถึง API และ tooling มีข้อมูลที่ AI อ่าน/ตรวจ/เรียกได้ ไม่ใช่ให้ AI bypass
 architecture:
@@ -246,7 +246,7 @@ consumer ใน migration slice เดียวกันเท่านั้น
 ```text
 AEngine/
   CMakeLists.txt
-  LICENSE                       # เลือกและอนุมัติใน Phase 0
+  LICENSE                       # MIT; third-party noticesแยกตาม provenance
   README.md
   cmake/
   docs/
@@ -1376,7 +1376,7 @@ condition ครบ
 ทำก่อน production source:
 
 - approve mission/scope ในเอกสารนี้
-- เลือก open-source license และจัดทำ third-party license/SBOM policy
+- ยืนยัน MIT repository policy และจัดทำ third-party license/provenance/SBOM policy
 - เลือก compiler/platform matrix และ canonical CMake build/test commands
 - เปิด maintained code map และ dependency-direction guard
 - บันทึก donor/standard decisions ใน `docs/RESEARCH_BRIEF.md`
@@ -1389,7 +1389,7 @@ condition ครบ
 
 Exit:
 
-- license, supported platforms และ build toolchainถูกอนุมัติ
+- MIT/third-party policy, supported platforms และ build toolchainถูกอนุมัติ
 - repo structure/target naming/API error modelมี architecture testspec
 - ห้ามสร้าง renderer/game/editor scaffoldจน Phase 0 gateผ่าน
 
@@ -1662,7 +1662,8 @@ slice แยกในอนาคต ห้ามอ้างว่า in-proces
 
 ## 18. Stop lines
 
-- ไม่สร้าง production scaffold ก่อน Phase 0 อนุมัติ license/platform/toolchain/build policy
+- ไม่สร้าง production scaffold ก่อน Phase 0 อนุมัติ platform/toolchain/build และ
+  third-party provenance/SBOM policy
 - ไม่ rewrite APaint หรือ copy legacy managersเข้า engine directoryทั้งก้อน
 - ไม่ให้ `aengine_*` include/link APaint product targetหรือ borrow sibling source path
 - ไม่สร้าง API/target/registry ที่ไม่มี production consumer ใน slice เดียวกัน
@@ -1680,7 +1681,7 @@ slice แยกในอนาคต ห้ามอ้างว่า in-proces
 
 คำถามเหล่านี้ห้ามเดารวมใน implementation แรก:
 
-- open-source license, contributor license policy และ third-party/SBOM policy
+- contributor policy และ third-party license/provenance/SBOM policyภายใต้ MIT
 - compiler, Windows/Linux/macOS และ GPU/driver support matrix รุ่นแรก
 - ใช้ Flecs หลัง spike หรือเลือก ECS implementationอื่น
 - internal scene serialization และบทบาทของ glTF/OpenUSD

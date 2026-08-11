@@ -143,10 +143,10 @@ assumption ของผู้พัฒนา/AI
 - glTF เป็น first asset proof; USD ต้องตัดสินบทบาทแยก
 - textual shader source, reusable function library, SPIR-V reflection/ABI guard
 - C++ canonical workflows + C ABI + optional generated C# high-level façade
+- repository sourceใช้ MIT License; donor/third-party compatibilityยังต้อง auditรายรายการ
 
 สิ่งที่ยังไม่ตัดสินใน Phase 0:
 
-- open-source license ที่แน่นอน
 - supported compiler/OS/GPU matrix รุ่นแรก
 - Flecs เทียบกับ ECS implementation อื่น
 - internal scene serialization และบทบาทของ OpenUSD

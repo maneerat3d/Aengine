@@ -21,7 +21,8 @@
 1. อ่าน canonical architecture ทั้งไฟล์และ section ของ phase ปัจจุบัน
 2. ระบุ current phase, user outcome, owner/API, dependency direction, lifetime/state,
    invariants, exact files, tests และ stop line
-3. ตรวจว่า decision ที่จำเป็นได้รับอนุมัติแล้ว ห้ามเดา license/platform/toolchain/ECS
+3. รักษา MIT license ของ repository และห้ามเดา platform/toolchain/ECS หรือ license
+   compatibility ของ donor/third-party code
 4. สร้าง vertical slice ที่มี consumer จริง ห้าม scaffold ทุก module ล่วงหน้า
 5. public API ห้าม expose Vulkan, SDL, ImGui, ECS implementation pointer หรือ global
    service locator
